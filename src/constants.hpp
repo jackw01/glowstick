@@ -1,0 +1,25 @@
+// glowstick
+// Copyright 2020 jackw01. Released under the MIT License (see LICENSE for details).
+
+#pragma once
+
+#include <math.h>
+#include <FastLED.h>
+
+#include "fastledrgbw.hpp"
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+// Pin mapping
+const uint8_t PinLEDs = 2;
+
+// LEDs
+const uint8_t LEDCount = 84;
+const uint8_t LEDMasterBrightness = 10;
+
+// Colors
+const CRGBW ColorWhite = CRGBW(0, 0, 0, 255);
+const CRGBW ColorOff = CRGBW(0, 0, 0, 0);
+
