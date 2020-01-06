@@ -1,0 +1,5 @@
+.pio
+.pioenvs
+.piolibdeps
+.gcc-flags.json
+.vscode
