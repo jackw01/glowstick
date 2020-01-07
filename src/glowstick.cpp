@@ -31,12 +31,24 @@ void Glowstick::init() {
   FastLED.addLeds<WS2812B, PinLEDs>(ledsRGB, getRGBWSize(LEDCount));
   FastLED.setBrightness(LEDMasterBrightness);
   setAllLEDs(ColorOff);
+
+  u8g2.begin();
 }
 
 // Update function, called in a loop
 void Glowstick::tick() {
+  u8g2.clear();
+
+  u8g2.setFont(u8g2_font_5x8_tr);
+  u8g2.drawStr(0, 7, "Hello World!");
+  u8g2.drawStr(0, 15, "Hello World!");
+  u8g2.drawStr(0, 23, "Hello World!");
+  u8g2.drawStr(0, 32, "Hello World!");
+
+  u8g2.sendBuffer();
+
   Serial.println(encoderTicks);
-  delay(100);
+  delay(200);
 }
 
 void Glowstick::setAllLEDs(CRGBW color) {
