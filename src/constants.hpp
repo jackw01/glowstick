@@ -14,6 +14,9 @@
 
 // Pin mapping
 const uint8_t PinLEDs = 2;
+const uint8_t PinEncoderA = 3; // Must be an external interupt pin
+const uint8_t PinEncoderB = 4;
+const uint8_t PinEncoderButton = 5;
 
 // LEDs
 const uint8_t LEDCount = 84;
