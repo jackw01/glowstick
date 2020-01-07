@@ -4,7 +4,6 @@
 #pragma once
 
 #include <math.h>
-#include <FastLED.h>
 
 #include "fastledrgbw.hpp"
 
@@ -21,6 +20,10 @@ const uint8_t PinEncoderButton = 5;
 // LEDs
 const uint8_t LEDCount = 84;
 const uint8_t LEDMasterBrightness = 10;
+
+// Display
+const uint8_t CharacterHeight = 8;
+const uint8_t LineHeight = 11;
 
 // Colors
 const CRGBW ColorWhite = CRGBW(0, 0, 0, 255);

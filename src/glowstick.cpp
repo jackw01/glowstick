@@ -33,22 +33,23 @@ void Glowstick::init() {
   setAllLEDs(ColorOff);
 
   u8g2.begin();
+  u8g2.setFont(u8g2_font_profont12_tf);
 }
+
+static int count = CharacterHeight;
 
 // Update function, called in a loop
 void Glowstick::tick() {
   u8g2.clear();
 
-  u8g2.setFont(u8g2_font_5x8_tr);
-  u8g2.drawStr(0, 7, "Hello World!");
-  u8g2.drawStr(0, 15, "Hello World!");
-  u8g2.drawStr(0, 23, "Hello World!");
-  u8g2.drawStr(0, 32, "Hello World!");
+  u8g2.drawStr(0, count, "Hello World!");
+  count = (count + 1) % (32 + CharacterHeight);
+  u8g2.drawFrame(0, 0, 128, 32);
 
   u8g2.sendBuffer();
 
   Serial.println(encoderTicks);
-  delay(200);
+  delay(70);
 }
 
 void Glowstick::setAllLEDs(CRGBW color) {
