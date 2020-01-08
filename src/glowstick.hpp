@@ -12,25 +12,36 @@
 typedef enum {
   DisplayStateMenu,
   DisplayStateHSV,
-  DisplayStateWhite
+  DisplayStateWhite,
+  DisplayStateGradient
 } DisplayState;
 
+// Main screen
 typedef enum {
   MenuItemHSV,
   MenuItemWhite,
   MenuItemGradient,
   MenuItemAnimation,
   MenuItemDisplayBrightness,
-  MenuItems
-} MenuItem;
+  MenuItemsMain
+} MenuItemMain;
 
-static const char *MenuStrings[5] = {
+static const char *MenuStringsMain[5] = {
   "HSV",
   "White",
   "Gradient",
   "Animations",
   "Display Brightness"
 };
+
+// HSV screen
+typedef enum {
+  MenuItemH,
+  MenuItemS,
+  MenuItemV,
+  MenuItemBack,
+  MenuItemsHSV
+} SubmenuItemHSV;
 
 class Glowstick {
   public:
@@ -48,11 +59,16 @@ class Glowstick {
     unsigned long lastSerialUpdate = 0;
 
     bool displayNeedsRedrawing = true;
-    uint8_t currentDisplayState = 0;
+    uint8_t currentDisplayState = DisplayStateHSV;
     int8_t currentMenuItem = 0;
+    uint8_t currentMenuLength = MenuItemsHSV;
     uint8_t scrollOffset = 0;
 
+    CHSV hsvValue = CHSV(128, 255, 128);
+
     void drawMenu();
+    void drawHSVControls();
+
     void handleButtonPress();
 
     void setAllLEDs(CRGBW color);
