@@ -24,7 +24,7 @@ typedef enum {
   MenuItemAnimation,
   MenuItemDisplayBrightness,
   MenuItemsMain
-} MenuItemMain;
+} MainMenuItem;
 
 static const char *MenuStringsMain[5] = {
   "HSV",
@@ -36,12 +36,12 @@ static const char *MenuStringsMain[5] = {
 
 // HSV screen
 typedef enum {
-  MenuItemH,
-  MenuItemS,
-  MenuItemV,
-  MenuItemBack,
-  MenuItemsHSV
-} SubmenuItemHSV;
+  HSVMenuItemH,
+  HSVMenuItemS,
+  HSVMenuItemV,
+  HSVMenuItemBack,
+  HSVMenuItems
+} HSVMenuItem;
 
 class Glowstick {
   public:
@@ -61,10 +61,11 @@ class Glowstick {
     bool displayNeedsRedrawing = true;
     uint8_t currentDisplayState = DisplayStateHSV;
     int8_t currentMenuItem = 0;
-    uint8_t currentMenuLength = MenuItemsHSV;
+    uint8_t currentMenuLength = HSVMenuItems;
     uint8_t scrollOffset = 0;
+    bool editState = false;
 
-    CHSV hsvValue = CHSV(128, 255, 128);
+    uint8_t hsvValue[3] = {128, 255, 128};
 
     void drawMenu();
     void drawHSVControls();

@@ -59,9 +59,13 @@ void Glowstick::tick() {
 
   // Read encoder and button
   if (encoderDelta != 0) {
-    currentMenuItem += encoderDelta;
-    if (currentMenuItem < 0) currentMenuItem = currentMenuLength + currentMenuItem;
-    else if (currentMenuItem >= currentMenuLength) currentMenuItem -= currentMenuLength;
+    if (currentDisplayState == DisplayStateHSV && editState) { // Editing HSV values
+      hsvValue[currentMenuItem] = constrain(hsvValue[currentMenuItem] + encoderDelta, 0, 255);
+    } else { // Other cases - just change selected item
+      currentMenuItem += encoderDelta;
+      if (currentMenuItem < 0) currentMenuItem = currentMenuLength + currentMenuItem;
+      else if (currentMenuItem >= currentMenuLength) currentMenuItem -= currentMenuLength;
+    }
     displayNeedsRedrawing = true;
     encoderDelta = 0;
   }
@@ -106,21 +110,19 @@ void Glowstick::drawMenu() {
 }
 
 void Glowstick::drawHSVControls() {
-  if (currentMenuItem == MenuItemBack) u8g2.drawBox(0, 0, 12, u8g2.getDisplayHeight());
+  if (currentMenuItem == HSVMenuItemBack) u8g2.drawBox(0, 0, 12, u8g2.getDisplayHeight());
   u8g2.setDrawColor(2);
   u8g2.drawTriangle(10, LineHeight,
                     2, LineHeight + CharacterHeight / 2,
                     10, LineHeight + CharacterHeight);
   u8g2.setDrawColor(1);
 
-  for (uint8_t i = MenuItemH; i <= MenuItemV; i++) {
+  for (uint8_t i = HSVMenuItemH; i <= HSVMenuItemV; i++) {
     if (currentMenuItem == i) {
       u8g2.drawFrame(25, 1 + i * LineHeight, u8g2.getDisplayWidth() - 25, CharacterHeight - 2);
-      u8g2.drawBox(26, 2 + i * LineHeight,
-                   // map, CharacterHeight - 2)
-    } else {
-      u8g2.drawFrame(25, 2 + i * LineHeight, u8g2.getDisplayWidth() - 25, CharacterHeight - 4);
     }
+    u8g2.drawBox(26, 2 + i * LineHeight,
+                 map(hsvValue[i], 0, 255, 0, u8g2.getDisplayWidth() - 27), CharacterHeight - 4);
   }
 
   u8g2.drawStr(16, CharacterHeight, "H");
@@ -129,7 +131,9 @@ void Glowstick::drawHSVControls() {
 }
 
 void Glowstick::handleButtonPress() {
-
+  if (currentDisplayState == DisplayStateHSV && currentMenuItem != HSVMenuItemBack) {
+    editState = !editState;
+  }
 }
 
 void Glowstick::setAllLEDs(CRGBW color) {
