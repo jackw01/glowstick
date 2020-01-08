@@ -34,25 +34,35 @@ void Glowstick::init() {
 
   u8g2.begin();
   u8g2.setFont(u8g2_font_profont12_tf);
+  u8g2.setFontMode(1);
 }
-
-static int count = CharacterHeight;
 
 // Update function, called in a loop
 void Glowstick::tick() {
-  u8g2.clear();
-
-  u8g2.drawStr(0, count, "Hello World!");
-  count = (count + 1) % (32 + CharacterHeight);
-  u8g2.drawFrame(0, 0, 128, 32);
-
-  u8g2.sendBuffer();
+  if (displayNeedsRedrawing) {
+    u8g2.clear();
+    if (currentDisplayState == DisplayStateMenu) drawMenu();
+    //u8g2.drawFrame(0, 0, 128, 32);
+    u8g2.sendBuffer();
+    displayNeedsRedrawing = false;
+  }
 
   Serial.println(encoderTicks);
-  delay(70);
+  delay(100);
+}
+
+void Glowstick::drawMenu() {
+  for (uint8_t i = 0; i < MenuItems; i++) {
+    if (i == currentMenuItem) {
+      u8g2.drawTriangle(0, i * LineHeight,
+                        8, i * LineHeight + CharacterHeight / 2,
+                        0, i * LineHeight + CharacterHeight);
+    }
+    u8g2.drawStr(10, CharacterHeight + i * LineHeight, MenuStrings[i]);
+  }
 }
 
 void Glowstick::setAllLEDs(CRGBW color) {
-  for (int i = 0; i < LEDCount; i++) leds[i] = color;
+  for (uint8_t i = 0; i < LEDCount; i++) leds[i] = color;
   FastLED.show();
 }
