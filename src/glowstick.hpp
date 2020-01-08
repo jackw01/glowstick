@@ -38,6 +38,11 @@ class Glowstick {
     CRGBW leds[LEDCount];
     U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2 = U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C(U8G2_R0);
 
+    bool prevButtonState = false;
+
+    unsigned long lastButtonChange = 0;
+    unsigned long lastSerialUpdate = 0;
+
     bool displayNeedsRedrawing = true;
     uint8_t currentDisplayState = 0;
     uint8_t currentMenuItem = 0;

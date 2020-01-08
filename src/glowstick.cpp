@@ -5,12 +5,16 @@
 
 // Encoder interrupt stuff
 static long encoderTicks = 0;
+static unsigned long lastEncoderRead = 0;
 
 static void encoderISR() {
-  // Determine whether signal B is high to find direction of rotation
-  bool b = digitalRead(PinEncoderB);
-  if (b) encoderTicks ++;
-  else encoderTicks --;
+  unsigned long time = millis();
+  if (time - lastEncoderRead > DebounceInterval) { // Debounce
+    // Determine whether signal B is high to find direction of rotation
+    if (digitalRead(PinEncoderB)) encoderTicks ++;
+    else encoderTicks --;
+    lastEncoderRead = time;
+  }
 }
 
 Glowstick::Glowstick() {
@@ -22,6 +26,11 @@ void Glowstick::init() {
   pinMode(PinEncoderA, INPUT_PULLUP);
   pinMode(PinEncoderB, INPUT_PULLUP);
   pinMode(PinEncoderButton, INPUT_PULLUP);
+
+  pinMode(13, OUTPUT);
+  digitalWrite(13, LOW);
+
+  Serial.begin(115200);
 
   cli(); // Disable interrupts before attaching and then enable
   attachInterrupt(digitalPinToInterrupt(PinEncoderA), encoderISR, RISING);
@@ -39,6 +48,16 @@ void Glowstick::init() {
 
 // Update function, called in a loop
 void Glowstick::tick() {
+  unsigned long time = millis();
+
+  bool buttonState = !digitalRead(PinEncoderButton);
+  if (time - lastButtonChange > DebounceInterval && buttonState && !prevButtonState) {
+    // act here
+    Serial.println("button");
+  }
+  if (buttonState != prevButtonState) lastButtonChange = time;
+  prevButtonState = buttonState;
+
   if (displayNeedsRedrawing) {
     u8g2.clear();
     if (currentDisplayState == DisplayStateMenu) drawMenu();
@@ -47,8 +66,10 @@ void Glowstick::tick() {
     displayNeedsRedrawing = false;
   }
 
-  Serial.println(encoderTicks);
-  delay(100);
+  if (time - lastSerialUpdate > SerialUpdateInterval) {
+    Serial.println(encoderTicks);
+    lastSerialUpdate = time;
+  }
 }
 
 void Glowstick::drawMenu() {
