@@ -24,6 +24,7 @@ const uint8_t LEDMasterBrightness = 10;
 // Display
 const uint8_t CharacterHeight = 8;
 const uint8_t LineHeight = 11;
+const uint8_t DisplayLines = 3;
 
 // Encoder / button
 const uint8_t DebounceInterval = 20; // 24 ppr * 20ms = 480ms per rotation min

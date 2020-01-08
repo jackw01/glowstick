@@ -4,15 +4,15 @@
 #include "glowstick.hpp"
 
 // Encoder interrupt stuff
-static long encoderTicks = 0;
+static int8_t encoderDelta = 0;
 static unsigned long lastEncoderRead = 0;
 
 static void encoderISR() {
   unsigned long time = millis();
   if (time - lastEncoderRead > DebounceInterval) { // Debounce
     // Determine whether signal B is high to find direction of rotation
-    if (digitalRead(PinEncoderB)) encoderTicks ++;
-    else encoderTicks --;
+    if (digitalRead(PinEncoderB)) encoderDelta ++;
+    else encoderDelta --;
     lastEncoderRead = time;
   }
 }
@@ -50,14 +50,24 @@ void Glowstick::init() {
 void Glowstick::tick() {
   unsigned long time = millis();
 
+  // Read encoder and button
+  if (encoderDelta != 0) {
+    currentMenuItem += encoderDelta;
+    if (currentMenuItem < 0) currentMenuItem = MenuItems + currentMenuItem;
+    if (currentMenuItem >= MenuItems) currentMenuItem -= MenuItems;
+    displayNeedsRedrawing = true;
+    encoderDelta = 0;
+  }
+
   bool buttonState = !digitalRead(PinEncoderButton);
   if (time - lastButtonChange > DebounceInterval && buttonState && !prevButtonState) {
-    // act here
+    handleButtonPress();
     Serial.println("button");
   }
   if (buttonState != prevButtonState) lastButtonChange = time;
   prevButtonState = buttonState;
 
+  // Redraw display
   if (displayNeedsRedrawing) {
     u8g2.clear();
     if (currentDisplayState == DisplayStateMenu) drawMenu();
@@ -66,21 +76,28 @@ void Glowstick::tick() {
     displayNeedsRedrawing = false;
   }
 
+  // Send any data over serial monitor for debugging
   if (time - lastSerialUpdate > SerialUpdateInterval) {
-    Serial.println(encoderTicks);
+    Serial.println(currentMenuItem);
     lastSerialUpdate = time;
   }
 }
 
 void Glowstick::drawMenu() {
+  uint8_t lastItem = scrollOffset + DisplayLines - 1;
+  if (currentMenuItem >= lastItem) scrollOffset += currentMenuItem - lastItem;
+  if (currentMenuItem < scrollOffset) scrollOffset = currentMenuItem;
   for (uint8_t i = 0; i < MenuItems; i++) {
-    if (i == currentMenuItem) {
+    if (i + scrollOffset == currentMenuItem) {
       u8g2.drawTriangle(0, i * LineHeight,
                         8, i * LineHeight + CharacterHeight / 2,
                         0, i * LineHeight + CharacterHeight);
     }
-    u8g2.drawStr(10, CharacterHeight + i * LineHeight, MenuStrings[i]);
+    u8g2.drawStr(10, CharacterHeight + i * LineHeight, MenuStrings[i + scrollOffset]);
   }
+}
+
+void Glowstick::handleButtonPress() {
 }
 
 void Glowstick::setAllLEDs(CRGBW color) {

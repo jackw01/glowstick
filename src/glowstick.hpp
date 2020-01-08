@@ -18,14 +18,18 @@ typedef enum {
 typedef enum {
   MenuItemHSV,
   MenuItemWhite,
+  MenuItemGradient,
   MenuItemAnimation,
+  MenuItemDisplayBrightness,
   MenuItems
 } MenuItem;
 
-static const char *MenuStrings[3] = {
+static const char *MenuStrings[5] = {
   "HSV",
   "White",
-  "Animation"
+  "Gradient",
+  "Animations",
+  "Display Brightness"
 };
 
 class Glowstick {
@@ -45,9 +49,11 @@ class Glowstick {
 
     bool displayNeedsRedrawing = true;
     uint8_t currentDisplayState = 0;
-    uint8_t currentMenuItem = 0;
+    int8_t currentMenuItem = 0;
+    uint8_t scrollOffset = 0;
 
     void drawMenu();
+    void handleButtonPress();
 
     void setAllLEDs(CRGBW color);
 };
