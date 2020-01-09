@@ -83,7 +83,8 @@ class Glowstick {
     void drawMenu();
 
     void drawBackButton(bool highlight);
-    void drawSlider(uint8_t line, uint8_t left, uint8_t value, uint8_t min, uint8_t max,
+    void drawSlider(uint8_t line, uint8_t left, uint8_t width,
+                    uint8_t value, uint8_t min, uint8_t max,
                     bool selected, bool active);
 
     void drawHSVControls();
