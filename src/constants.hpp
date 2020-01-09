@@ -3,13 +3,7 @@
 
 #pragma once
 
-#include <math.h>
-
 #include "fastledrgbw.hpp"
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 // Pin mapping
 const uint8_t PinLEDs = 2;
@@ -20,6 +14,7 @@ const uint8_t PinEncoderButton = 5;
 // LEDs
 const uint8_t LEDCount = 84;
 const uint8_t LEDMasterBrightness = 10;
+const CRGBW ColorOff = CRGBW(0, 0, 0, 0);
 
 // Display
 const uint8_t CharacterHeight = 8;
@@ -31,8 +26,3 @@ const uint8_t DebounceInterval = 20; // 24 ppr * 20ms = 480ms per rotation min
 
 // Misc
 const uint8_t SerialUpdateInterval = 200;
-
-// Colors
-const CRGBW ColorWhite = CRGBW(0, 0, 0, 255);
-const CRGBW ColorOff = CRGBW(0, 0, 0, 0);
-

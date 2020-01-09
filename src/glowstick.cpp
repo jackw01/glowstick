@@ -27,14 +27,14 @@ void Glowstick::init() {
   pinMode(PinEncoderB, INPUT_PULLUP);
   pinMode(PinEncoderButton, INPUT_PULLUP);
 
+  cli(); // Disable interrupts before attaching and then enable
+  attachInterrupt(digitalPinToInterrupt(PinEncoderA), encoderISR, RISING);
+  sei();
+
   pinMode(13, OUTPUT);
   digitalWrite(13, LOW);
 
   Serial.begin(115200);
-
-  cli(); // Disable interrupts before attaching and then enable
-  attachInterrupt(digitalPinToInterrupt(PinEncoderA), encoderISR, RISING);
-  sei();
 
   CRGB *ledsRGB = (CRGB *) &leds[0]; // Hack to get RGBW to work
   FastLED.addLeds<WS2812B, PinLEDs>(ledsRGB, getRGBWSize(LEDCount));
@@ -71,11 +71,10 @@ void Glowstick::tick() {
   }
 
   bool buttonState = !digitalRead(PinEncoderButton);
-  if (time - lastButtonChange > DebounceInterval && buttonState && !prevButtonState) {
-    handleButtonPress();
-    Serial.println("button");
+  if (buttonState != prevButtonState) {
+    if (time - lastButtonChange > DebounceInterval && buttonState) handleButtonPress();
+    lastButtonChange = time;
   }
-  if (buttonState != prevButtonState) lastButtonChange = time;
   prevButtonState = buttonState;
 
   // Redraw display
@@ -83,6 +82,9 @@ void Glowstick::tick() {
     u8g2.clear();
     if (currentDisplayState == DisplayStateMenu) drawMenu();
     else if (currentDisplayState == DisplayStateHSV) drawHSVControls();
+    else if (currentDisplayState == DisplayStateWhite) drawWhiteControls();
+    else if (currentDisplayState == DisplayStateGradient) drawGradientControls();
+    else if (currentDisplayState == DisplayStateBrightness) drawBrightnessControls();
     //u8g2.drawFrame(0, 0, 128, 32);
     u8g2.sendBuffer();
     displayNeedsRedrawing = false;
@@ -110,6 +112,7 @@ void Glowstick::drawMenu() {
 }
 
 void Glowstick::drawHSVControls() {
+  // Back button
   if (currentMenuItem == HSVMenuItemBack) u8g2.drawBox(0, 0, 12, u8g2.getDisplayHeight());
   u8g2.setDrawColor(2);
   u8g2.drawTriangle(10, LineHeight,
@@ -117,6 +120,7 @@ void Glowstick::drawHSVControls() {
                     10, LineHeight + CharacterHeight);
   u8g2.setDrawColor(1);
 
+  // "sliders"
   for (uint8_t i = HSVMenuItemH; i <= HSVMenuItemV; i++) {
     if (currentMenuItem == i) {
       u8g2.drawFrame(25, 1 + i * LineHeight, u8g2.getDisplayWidth() - 25, CharacterHeight - 2);
@@ -125,14 +129,38 @@ void Glowstick::drawHSVControls() {
                  map(hsvValue[i], 0, 255, 0, u8g2.getDisplayWidth() - 27), CharacterHeight - 4);
   }
 
+  // Labels
   u8g2.drawStr(16, CharacterHeight, "H");
   u8g2.drawStr(16, CharacterHeight + LineHeight, "S");
   u8g2.drawStr(16, CharacterHeight + 2 * LineHeight, "V");
 }
 
+void Glowstick::drawWhiteControls() {
+
+}
+
+void Glowstick::drawGradientControls() {
+
+}
+
+void Glowstick::drawBrightnessControls() {
+
+}
+
 void Glowstick::handleButtonPress() {
-  if (currentDisplayState == DisplayStateHSV && currentMenuItem != HSVMenuItemBack) {
+  if (currentDisplayState == DisplayStateMenu) {
+    // Change display state in main menu
+    currentDisplayState = currentMenuItem;
+    currentMenuItem = 0;
+    editState = false;
+  } else if (currentDisplayState == DisplayStateHSV && currentMenuItem != HSVMenuItemBack) {
+    // Change edit state in modes with multiple selectable fields
     editState = !editState;
+  } else if ((currentDisplayState == DisplayStateHSV && currentMenuItem == HSVMenuItemBack) ||
+             currentDisplayState == DisplayStateBrightness) {
+    // Go back
+    currentDisplayState = DisplayStateMenu;
+    currentMenuItem = 0;
   }
 }
 

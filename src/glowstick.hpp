@@ -10,14 +10,16 @@
 #include "fastledrgbw.hpp"
 
 typedef enum {
-  DisplayStateMenu,
   DisplayStateHSV,
   DisplayStateWhite,
-  DisplayStateGradient
+  DisplayStateGradient,
+  DisplayStateAnimation,
+  DisplayStateBrightness,
+  DisplayStateMenu
 } DisplayState;
 
 // Main screen
-typedef enum {
+typedef enum { // Main menu items must match up with respective DisplayStates
   MenuItemHSV,
   MenuItemWhite,
   MenuItemGradient,
@@ -69,6 +71,9 @@ class Glowstick {
 
     void drawMenu();
     void drawHSVControls();
+    void drawWhiteControls();
+    void drawGradientControls();
+    void drawBrightnessControls();
 
     void handleButtonPress();
 
