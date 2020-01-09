@@ -6,7 +6,7 @@
 - [ ] numbers on value inputs
 - [ ] white brightness input screen
 - [ ] hue gradient input screen
-- [ ] display brightness control
+- [x] display brightness control
 - [ ] display timeout control
 - [ ] startup screen
 - [ ] animation menu

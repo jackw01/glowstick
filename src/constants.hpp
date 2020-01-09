@@ -21,10 +21,15 @@ const uint8_t CharacterHeight = 8;
 const uint8_t LineHeight = 11;
 const uint8_t DisplayLines = 3;
 const uint16_t BlinkInterval = 500;
+const uint8_t DisplayBrightnessLimit = 128;
 
 // Encoder / button
 const uint8_t DebounceInterval = 20; // 24 ppr * 20ms = 480ms per rotation min
 const uint8_t EncoderFineAdjustScale = 3;
+const uint8_t EncoderCoarseAdjustScale = 8;
 
 // Misc
 const uint8_t SerialUpdateInterval = 200;
+
+// EEPROM Settings
+const uint16_t EEPROMAddrBrightness = 0;

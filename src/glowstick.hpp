@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <Wire.h>
+#include <EEPROM.h>
 #include <FastLED.h>
 #include <U8g2lib.h>
 
@@ -63,6 +64,8 @@ class Glowstick {
     CRGBW leds[LEDCount];
     U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2 = U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C(U8G2_R0);
 
+    uint8_t displayBrightness = EEPROM.read(EEPROMAddrBrightness);
+
     bool prevButtonState = false;
 
     unsigned long lastButtonChange = 0;
@@ -78,6 +81,11 @@ class Glowstick {
     uint8_t hsvValue[3] = {128, 255, 128};
 
     void drawMenu();
+
+    void drawBackButton(bool highlight);
+    void drawSlider(uint8_t line, uint8_t left, uint8_t value, uint8_t min, uint8_t max,
+                    bool selected, bool active);
+
     void drawHSVControls();
     void drawWhiteControls();
     void drawGradientControls();

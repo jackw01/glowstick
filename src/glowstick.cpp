@@ -50,7 +50,7 @@ void Glowstick::init() {
   u8x8_cad_SendCmd(u8g2.getU8x8(), 0x0db);
   u8x8_cad_SendArg(u8g2.getU8x8(), 0 << 4); // Replace 0 with Vcom deselect value 0 to 7
   u8x8_cad_EndTransfer(u8g2.getU8x8());
-  u8g2.setContrast(128);
+  u8g2.setContrast(displayBrightness);
 }
 
 // Update function, called in a loop
@@ -62,6 +62,10 @@ void Glowstick::tick() {
     if (currentDisplayState == DisplayStateHSV && editState) { // Editing HSV values
       hsvValue[currentMenuItem] = constrain(hsvValue[currentMenuItem] +
                                             encoderDelta * EncoderFineAdjustScale, 0, 255);
+    } else if (currentDisplayState == DisplayStateBrightness) { // Adjust brightness
+      displayBrightness = constrain(displayBrightness + encoderDelta * EncoderCoarseAdjustScale,
+                                    0, DisplayBrightnessLimit);
+      u8g2.setContrast(displayBrightness);
     } else { // Other cases - just change selected item
       currentMenuItem += encoderDelta;
       if (currentMenuItem < 0) currentMenuItem = currentMenuLength + currentMenuItem;
@@ -112,27 +116,34 @@ void Glowstick::drawMenu() {
   }
 }
 
-void Glowstick::drawHSVControls() {
-  // Back button
-  if (currentMenuItem == HSVMenuItemBack) u8g2.drawBox(0, 0, 12, u8g2.getDisplayHeight());
+void Glowstick::drawBackButton(bool highlight) {
+  if (highlight) u8g2.drawBox(0, 0, 12, u8g2.getDisplayHeight());
   u8g2.setDrawColor(2);
   u8g2.drawTriangle(10, LineHeight,
                     2, LineHeight + CharacterHeight / 2,
                     10, LineHeight + CharacterHeight);
   u8g2.setDrawColor(1);
+}
 
-  // "sliders"
+void Glowstick::drawSlider(uint8_t line, uint8_t left, uint8_t value, uint8_t min, uint8_t max,
+                           bool selected, bool active) {
+  if (selected) {
+    u8g2.drawFrame(left, 1 + line * LineHeight,
+                   u8g2.getDisplayWidth() - left, CharacterHeight - 2);
+  }
+  uint8_t barLength = map(value, min, max, 0, u8g2.getDisplayWidth() - (left + 4));
+  if (active) {
+    u8g2.drawBox(left + 2 + barLength - 1, 3 + line * LineHeight, 3, CharacterHeight - 6);
+  } else u8g2.drawBox(left + 2, 3 + line * LineHeight, barLength, CharacterHeight - 6);
+}
+
+void Glowstick::drawHSVControls() {
+  drawBackButton(currentMenuItem == HSVMenuItemBack);
+
+  // Sliders
   for (uint8_t i = HSVMenuItemH; i <= HSVMenuItemV; i++) {
-    if (currentMenuItem == i) {
-      u8g2.drawFrame(25, 1 + i * LineHeight, u8g2.getDisplayWidth() - 25, CharacterHeight - 2);
-    }
-
-    uint8_t barLength = map(hsvValue[i], 0, 255, 0, u8g2.getDisplayWidth() - 29);
-    if (currentMenuItem == i && editState) {
-      u8g2.drawBox(27 + barLength - 1, 3 + i * LineHeight, 3, CharacterHeight - 6);
-    } else {
-      u8g2.drawBox(27, 3 + i * LineHeight, barLength, CharacterHeight - 6);
-    }
+    drawSlider(i, 25, hsvValue[i], 0, 255,
+               currentMenuItem == i, currentMenuItem == i && editState);
   }
 
   // Labels
@@ -150,7 +161,9 @@ void Glowstick::drawGradientControls() {
 }
 
 void Glowstick::drawBrightnessControls() {
-
+  drawBackButton(true);
+  u8g2.drawStr(16, CharacterHeight, "Brightness");
+  drawSlider(1, 16, displayBrightness, 0, DisplayBrightnessLimit, true, true);
 }
 
 void Glowstick::handleButtonPress() {
@@ -165,6 +178,11 @@ void Glowstick::handleButtonPress() {
     editState = !editState;
   } else if ((currentDisplayState == DisplayStateHSV && currentMenuItem == HSVMenuItemBack) ||
              currentDisplayState == DisplayStateBrightness) {
+    // Save settings for some states
+    if (currentDisplayState == DisplayStateBrightness) {
+      EEPROM.write(EEPROMAddrBrightness, displayBrightness);
+    }
+
     // Go back
     currentDisplayState = DisplayStateMenu;
     currentMenuItem = 0;
