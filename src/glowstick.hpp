@@ -9,6 +9,7 @@
 #include "constants.hpp"
 #include "fastledrgbw.hpp"
 
+// All possible display states ("screens")
 typedef enum {
   DisplayStateHSV,
   DisplayStateWhite,
@@ -18,7 +19,7 @@ typedef enum {
   DisplayStateMenu
 } DisplayState;
 
-// Main screen
+// Main menu items and MenuItemsMain which represents the number of items
 typedef enum { // Main menu items must match up with respective DisplayStates
   MenuItemHSV,
   MenuItemWhite,
@@ -28,6 +29,7 @@ typedef enum { // Main menu items must match up with respective DisplayStates
   MenuItemsMain
 } MainMenuItem;
 
+// Strings associated with main menu items
 static const char *MenuStringsMain[5] = {
   "HSV",
   "White",
@@ -36,7 +38,7 @@ static const char *MenuStringsMain[5] = {
   "Display Brightness"
 };
 
-// HSV screen
+// HSV screen submenu items
 typedef enum {
   HSVMenuItemH,
   HSVMenuItemS,
@@ -44,6 +46,12 @@ typedef enum {
   HSVMenuItemBack,
   HSVMenuItems
 } HSVMenuItem;
+
+// Lengths of submenus for each DisplayState
+// 0 if the DisplayState does not have a submenu
+const uint8_t MenuLengths[5] {
+  HSVMenuItems, 0, 0, 0, 0
+};
 
 class Glowstick {
   public:

@@ -60,7 +60,8 @@ void Glowstick::tick() {
   // Read encoder and button
   if (encoderDelta != 0) {
     if (currentDisplayState == DisplayStateHSV && editState) { // Editing HSV values
-      hsvValue[currentMenuItem] = constrain(hsvValue[currentMenuItem] + encoderDelta, 0, 255);
+      hsvValue[currentMenuItem] = constrain(hsvValue[currentMenuItem] +
+                                            encoderDelta * EncoderFineAdjustScale, 0, 255);
     } else { // Other cases - just change selected item
       currentMenuItem += encoderDelta;
       if (currentMenuItem < 0) currentMenuItem = currentMenuLength + currentMenuItem;
@@ -79,7 +80,7 @@ void Glowstick::tick() {
 
   // Redraw display
   if (displayNeedsRedrawing) {
-    u8g2.clear();
+    u8g2.clearBuffer();
     if (currentDisplayState == DisplayStateMenu) drawMenu();
     else if (currentDisplayState == DisplayStateHSV) drawHSVControls();
     else if (currentDisplayState == DisplayStateWhite) drawWhiteControls();
@@ -101,7 +102,7 @@ void Glowstick::drawMenu() {
   uint8_t lastItem = scrollOffset + DisplayLines - 1;
   if (currentMenuItem >= lastItem) scrollOffset += currentMenuItem - lastItem;
   if (currentMenuItem < scrollOffset) scrollOffset = currentMenuItem;
-  for (uint8_t i = 0; i < currentMenuLength; i++) {
+  for (uint8_t i = 0; i < MenuItemsMain; i++) {
     if (i + scrollOffset == currentMenuItem) {
       u8g2.drawTriangle(0, i * LineHeight,
                         8, i * LineHeight + CharacterHeight / 2,
@@ -125,8 +126,13 @@ void Glowstick::drawHSVControls() {
     if (currentMenuItem == i) {
       u8g2.drawFrame(25, 1 + i * LineHeight, u8g2.getDisplayWidth() - 25, CharacterHeight - 2);
     }
-    u8g2.drawBox(26, 2 + i * LineHeight,
-                 map(hsvValue[i], 0, 255, 0, u8g2.getDisplayWidth() - 27), CharacterHeight - 4);
+
+    uint8_t barLength = map(hsvValue[i], 0, 255, 0, u8g2.getDisplayWidth() - 29);
+    if (currentMenuItem == i && editState) {
+      u8g2.drawBox(27 + barLength - 1, 3 + i * LineHeight, 3, CharacterHeight - 6);
+    } else {
+      u8g2.drawBox(27, 3 + i * LineHeight, barLength, CharacterHeight - 6);
+    }
   }
 
   // Labels
@@ -152,6 +158,7 @@ void Glowstick::handleButtonPress() {
     // Change display state in main menu
     currentDisplayState = currentMenuItem;
     currentMenuItem = 0;
+    currentMenuLength = MenuLengths[currentDisplayState];
     editState = false;
   } else if (currentDisplayState == DisplayStateHSV && currentMenuItem != HSVMenuItemBack) {
     // Change edit state in modes with multiple selectable fields
@@ -161,7 +168,10 @@ void Glowstick::handleButtonPress() {
     // Go back
     currentDisplayState = DisplayStateMenu;
     currentMenuItem = 0;
+    currentMenuLength = MenuItemsMain;
+    scrollOffset = 0;
   }
+  displayNeedsRedrawing = true;
 }
 
 void Glowstick::setAllLEDs(CRGBW color) {

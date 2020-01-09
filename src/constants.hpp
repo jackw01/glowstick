@@ -20,9 +20,11 @@ const CRGBW ColorOff = CRGBW(0, 0, 0, 0);
 const uint8_t CharacterHeight = 8;
 const uint8_t LineHeight = 11;
 const uint8_t DisplayLines = 3;
+const uint16_t BlinkInterval = 500;
 
 // Encoder / button
 const uint8_t DebounceInterval = 20; // 24 ppr * 20ms = 480ms per rotation min
+const uint8_t EncoderFineAdjustScale = 3;
 
 // Misc
 const uint8_t SerialUpdateInterval = 200;
