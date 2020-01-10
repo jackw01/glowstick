@@ -3,7 +3,7 @@
 - [x] encoder debouncing
 - [x] hsv value input screen
 - [x] forward/back navigation
-- [ ] numbers on value inputs
+- [x] numbers on value inputs
 - [ ] white brightness input screen
 - [ ] hue gradient input screen
 - [x] display brightness control

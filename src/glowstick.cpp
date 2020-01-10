@@ -65,7 +65,8 @@ void Glowstick::tick() {
     } else if (currentDisplayState == DisplayStateBrightness) { // Adjust brightness
       displayBrightness = constrain(displayBrightness + encoderDelta * EncoderCoarseAdjustScale,
                                     0, DisplayBrightnessLimit);
-      u8g2.setContrast(displayBrightness);
+      u8g2.setContrast((uint8_t)(
+        pow((float)displayBrightness / DisplayBrightnessLimit, 3) * DisplayBrightnessLimit));
     } else { // Other cases - just change selected item
       currentMenuItem += encoderDelta;
       if (currentMenuItem < 0) currentMenuItem = currentMenuLength + currentMenuItem;
@@ -138,11 +139,11 @@ void Glowstick::drawSlider(uint8_t line, uint8_t left, uint8_t width,
 void Glowstick::drawHSVControls() {
   drawBackButton(currentMenuItem == HSVMenuItemBack);
 
-  // Sliders
+  // Sliders and value indicators
   for (uint8_t i = HSVMenuItemH; i <= HSVMenuItemV; i++) {
-    drawSlider(i, 25, u8g2.getDisplayWidth() - 25 - 32, hsvValue[i], 0, 255,
+    drawSlider(i, 25, u8g2.getDisplayWidth() - 25 - 20, hsvValue[i], 0, 255,
                currentMenuItem == i, currentMenuItem == i && editState);
-    u8g2.setCursor(u8g2.getDisplayWidth() - 32, CharacterHeight + i * LineHeight);
+    u8g2.setCursor(u8g2.getDisplayWidth() - 18, CharacterHeight + i * LineHeight);
     if (i == 0) u8g2.print(map(hsvValue[i], 0, 255, 0, 359));
     else u8g2.print(map(hsvValue[i], 0, 255, 0, 100));
   }
@@ -184,7 +185,6 @@ void Glowstick::handleButtonPress() {
     if (currentDisplayState == DisplayStateBrightness) {
       EEPROM.write(EEPROMAddrBrightness, displayBrightness);
     }
-
     // Go back
     currentDisplayState = DisplayStateMenu;
     currentMenuItem = 0;

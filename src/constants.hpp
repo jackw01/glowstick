@@ -21,7 +21,7 @@ const uint8_t CharacterHeight = 8;
 const uint8_t LineHeight = 11;
 const uint8_t DisplayLines = 3;
 const uint16_t BlinkInterval = 500;
-const uint8_t DisplayBrightnessLimit = 128;
+const uint8_t DisplayBrightnessLimit = 255;
 
 // Encoder / button
 const uint8_t DebounceInterval = 20; // 24 ppr * 20ms = 480ms per rotation min
