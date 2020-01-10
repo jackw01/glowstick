@@ -62,6 +62,8 @@ void Glowstick::tick() {
     if (currentDisplayState == DisplayStateHSV && editState) { // Editing HSV values
       hsvValue[currentMenuItem] = constrain(hsvValue[currentMenuItem] +
                                             encoderDelta * EncoderFineAdjustScale, 0, 255);
+    } else if (currentDisplayState == DisplayStateHSV && editState) { // Editing white value
+      whiteValue = constrain(whiteValue + encoderDelta * EncoderFineAdjustScale, 0, 255);
     } else if (currentDisplayState == DisplayStateBrightness) { // Adjust brightness
       displayBrightness = constrain(displayBrightness + encoderDelta * EncoderCoarseAdjustScale,
                                     0, DisplayBrightnessLimit);
@@ -155,7 +157,13 @@ void Glowstick::drawHSVControls() {
 }
 
 void Glowstick::drawWhiteControls() {
-
+  drawBackButton(currentMenuItem == WhiteMenuItemBack);
+  u8g2.drawStr(16, CharacterHeight, "White Brightness");
+  drawSlider(1, 16, u8g2.getDisplayWidth() - 16, whiteValue, 0, 255,
+             currentMenuItem == WhiteMenuItemBrightness, editState);
+  u8g2.setCursor(16, CharacterHeight + 2 * LineHeight);
+  u8g2.print(map(whiteValue, 0, 255, 0, 100));
+  u8g2.print("%");
 }
 
 void Glowstick::drawGradientControls() {
@@ -176,10 +184,12 @@ void Glowstick::handleButtonPress() {
     currentMenuItem = 0;
     currentMenuLength = MenuLengths[currentDisplayState];
     editState = false;
-  } else if (currentDisplayState == DisplayStateHSV && currentMenuItem != HSVMenuItemBack) {
+  } else if ((currentDisplayState == DisplayStateHSV && currentMenuItem != HSVMenuItemBack) ||
+             (currentDisplayState == DisplayStateWhite && currentMenuItem != WhiteMenuItemBack)) {
     // Change edit state in modes with multiple selectable fields
     editState = !editState;
   } else if ((currentDisplayState == DisplayStateHSV && currentMenuItem == HSVMenuItemBack) ||
+             (currentDisplayState == DisplayStateWhite && currentMenuItem == WhiteMenuItemBack) ||
              currentDisplayState == DisplayStateBrightness) {
     // Save settings for some states
     if (currentDisplayState == DisplayStateBrightness) {
