@@ -50,6 +50,15 @@ void Glowstick::init() {
   u8x8_cad_SendArg(u8g2.getU8x8(), 0 << 4); // Replace 0 with Vcom deselect value 0 to 7
   u8x8_cad_EndTransfer(u8g2.getU8x8());
   u8g2.setContrast(displayBrightness);
+
+  // Display startup screen
+  u8g2.setFont(u8g2_font_logisoso16_tr);
+  u8g2.drawStr(0, 16, "GlowStick");
+  u8g2.setFont(u8g2_font_profont12_tr);
+  u8g2.drawStr(0, 30, "FW v1.0 by jackw01 <3");
+  u8g2.sendBuffer();
+
+  delay(1600);
 }
 
 // Update function, called in a loop
