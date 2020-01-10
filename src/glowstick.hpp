@@ -55,6 +55,15 @@ typedef enum {
   WhiteMenuItems
 } WhiteMenuItem;
 
+typedef enum {
+  GradientMenuItemPos1,
+  GradientMenuItemHue1,
+  GradientMenuItemPos2,
+  GradientMenuItemHue2,
+  GradientMenuItemBack,
+  GradientMenuItems
+} GradientMenuItem;
+
 // Lengths of submenus for each DisplayState
 // 0 if the DisplayState does not have a submenu
 const uint8_t MenuLengths[5] {
@@ -79,14 +88,15 @@ class Glowstick {
     unsigned long lastSerialUpdate = 0;
 
     bool displayNeedsRedrawing = true;
-    uint8_t currentDisplayState = DisplayStateWhite;
+    uint8_t displayState = DisplayStateGradient;
     int8_t currentMenuItem = 0;
-    uint8_t currentMenuLength = WhiteMenuItems;
+    uint8_t currentMenuLength = GradientMenuItems;
     uint8_t scrollOffset = 0;
     bool editState = false;
 
     uint8_t hsvValue[3] = {128, 255, 128};
     uint8_t whiteValue = 128;
+    uint8_t gradientValues[4] = {0, 0, 255, 255}; // Pairs of 2 ints - position and hue
 
     void drawMenu();
 

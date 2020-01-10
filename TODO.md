@@ -4,8 +4,8 @@
 - [x] hsv value input screen
 - [x] forward/back navigation
 - [x] numbers on value inputs
-- [ ] white brightness input screen
-- [ ] hue gradient input screen
+- [x] white brightness input screen
+- [x] hue gradient input screen
 - [x] display brightness control
 - [ ] display timeout control
 - [ ] startup screen
