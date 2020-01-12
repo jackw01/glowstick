@@ -8,7 +8,7 @@
 - [x] hue gradient input screen
 - [x] display brightness control
 - [ ] display timeout control
-- [ ] startup screen
+- [x] startup screen
 - [ ] animation menu
 - [ ] variable encoder sensitivity
 

@@ -28,7 +28,7 @@ typedef enum { // Main menu items must match up with respective DisplayStates
   MenuItemGradient,
   MenuItemAnimation,
   MenuItemDisplayBrightness,
-  MenuItemsMain
+  MainMenuItems
 } MainMenuItem;
 
 // Strings associated with main menu items
@@ -67,7 +67,7 @@ typedef enum {
 // Lengths of submenus for each DisplayState
 // 0 if the DisplayState does not have a submenu
 const uint8_t MenuLengths[5] {
-  HSVMenuItems, WhiteMenuItems, 0, 0, 0
+  HSVMenuItems, WhiteMenuItems, GradientMenuItems, 0, 0
 };
 
 class Glowstick {
@@ -78,7 +78,7 @@ class Glowstick {
 
   private:
     CRGBW leds[LEDCount];
-    U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2 = U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C(U8G2_R0);
+    U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2 = U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C(U8G2_R2);
 
     uint8_t displayBrightness = EEPROM.read(EEPROMAddrBrightness);
 
@@ -88,9 +88,9 @@ class Glowstick {
     unsigned long lastSerialUpdate = 0;
 
     bool displayNeedsRedrawing = true;
-    uint8_t displayState = DisplayStateGradient;
+    uint8_t displayState = DisplayStateMenu;
     int8_t currentMenuItem = 0;
-    uint8_t currentMenuLength = GradientMenuItems;
+    uint8_t currentMenuLength = MainMenuItems;
     uint8_t scrollOffset = 0;
     bool editState = false;
 

@@ -8,7 +8,7 @@ static int8_t encoderDelta = 0;
 static unsigned long lastEncoderRead = 0;
 
 static void encoderISR() {
-  bool b = digitalRead(PinEncoderB); // Determine whether signal B is high to find direction
+  bool b = !digitalRead(PinEncoderB); // Determine whether signal B is high to find direction
   unsigned long time = millis();
   if (time - lastEncoderRead > DebounceInterval) { // Debounce
     if (b) encoderDelta ++;
@@ -120,7 +120,7 @@ void Glowstick::drawMenu() {
   uint8_t lastItem = scrollOffset + DisplayLines - 1;
   if (currentMenuItem >= lastItem) scrollOffset += currentMenuItem - lastItem;
   if (currentMenuItem < scrollOffset) scrollOffset = currentMenuItem;
-  for (uint8_t i = 0; i < MenuItemsMain; i++) {
+  for (uint8_t i = 0; i < MainMenuItems; i++) {
     if (i + scrollOffset == currentMenuItem) {
       u8g2.drawTriangle(0, i * LineHeight,
                         8, i * LineHeight + CharacterHeight / 2,
@@ -224,7 +224,7 @@ void Glowstick::handleButtonPress() {
     // Go back
     displayState = DisplayStateMenu;
     currentMenuItem = 0;
-    currentMenuLength = MenuItemsMain;
+    currentMenuLength = MainMenuItems;
     scrollOffset = 0;
   }
   displayNeedsRedrawing = true;
