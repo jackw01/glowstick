@@ -70,7 +70,7 @@ void Glowstick::tick() {
     if (displayState == DisplayStateHSV && editState) { // Editing HSV values
       hsvValue[currentMenuItem] = constrain(hsvValue[currentMenuItem] +
                                             encoderDelta * EncoderFineAdjustScale, 0, 255);
-    } else if (displayState == DisplayStateHSV && editState) { // Editing white value
+    } else if (displayState == DisplayStateWhite && editState) { // Editing white value
       whiteValue = constrain(whiteValue + encoderDelta * EncoderFineAdjustScale, 0, 255);
     } else if (displayState == DisplayStateGradient && editState) { // Editing gradient
       gradientValues[currentMenuItem] = constrain(gradientValues[currentMenuItem] +
@@ -96,6 +96,18 @@ void Glowstick::tick() {
   }
   prevButtonState = buttonState;
 
+  // Update LEDs
+  if (displayState == DisplayStateHSV) {
+    CHSV hsv = CHSV(hsvValue[0], hsvValue[1], hsvValue[2]);
+    CRGB rgb;
+    hsv2rgb_rainbow(hsv, rgb);
+    setAllLEDs(CRGBW(rgb.r, rgb.g, rgb.b, 0));
+  } else if (displayState == DisplayStateWhite) {
+    setAllLEDs(CRGBW(0, 0, 0, whiteValue));
+  } else {
+    setAllLEDs(ColorOff);
+  }
+
   // Redraw display
   if (displayNeedsRedrawing) {
     u8g2.clearBuffer();
@@ -104,7 +116,6 @@ void Glowstick::tick() {
     else if (displayState == DisplayStateWhite) drawWhiteControls();
     else if (displayState == DisplayStateGradient) drawGradientControls();
     else if (displayState == DisplayStateBrightness) drawBrightnessControls();
-    //u8g2.drawFrame(0, 0, 128, 32);
     u8g2.sendBuffer();
     displayNeedsRedrawing = false;
   }

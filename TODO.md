@@ -7,6 +7,10 @@
 - [x] white brightness input screen
 - [x] hue gradient input screen
 - [x] display brightness control
+- [ ] hsv2rgbw
+- [ ] gradient display
+- [ ] fade in/out
+- [ ] master brightness
 - [ ] display timeout control
 - [x] startup screen
 - [ ] animation menu
