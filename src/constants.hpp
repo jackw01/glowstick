@@ -7,13 +7,14 @@
 
 // Pin mapping
 const uint8_t PinLEDs = 2;
-const uint8_t PinEncoderA = 3; // Must be an external interupt pin
+const uint8_t PinEncoderA = 3; // must be an external interupt pin
 const uint8_t PinEncoderB = 4;
 const uint8_t PinEncoderButton = 5;
 
 // LEDs
 const uint8_t LEDCount = 84;
 const uint8_t LEDMasterBrightness = 255;
+const uint8_t LEDBrightnessRampSpeed = 8; // units/frame
 const CRGBW ColorOff = CRGBW(0, 0, 0, 0);
 
 // Display
@@ -26,11 +27,11 @@ const uint8_t DisplayBrightnessLimit = 255;
 // Encoder / button
 const uint8_t DebounceInterval = 20; // 24 ppr * 20ms = 480ms per rotation min
 const uint8_t EncoderCoarseSpeedThreshold = 80; // below this time between pulses, increase speed
-const uint8_t EncoderFineAdjustScale = 1;
-const uint8_t EncoderCoarseAdjustScale = 12;
+const uint8_t EncoderFineAdjustScale = 1; // minimum adjustment speed
+const uint8_t EncoderCoarseAdjustScale = 12; // maximum adjustment speed
 
 // Misc
-const uint8_t SerialUpdateInterval = 200;
+const uint8_t UpdateInterval = 20; // ms per frame
 
 // EEPROM Settings
 const uint16_t EEPROMAddrBrightness = 0;

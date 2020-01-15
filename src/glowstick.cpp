@@ -40,12 +40,11 @@ void Glowstick::init() {
   attachInterrupt(digitalPinToInterrupt(PinEncoderA), encoderISR, LOW);
   sei();
 
-  Serial.begin(115200);
-
   CRGB *ledsRGB = (CRGB *) &leds[0]; // Hack to get RGBW to work
   FastLED.addLeds<WS2812B, PinLEDs>(ledsRGB, getRGBWSize(LEDCount));
   FastLED.setBrightness(LEDMasterBrightness);
   setAllLEDs(ColorOff);
+  FastLED.show();
 
   u8g2.begin();
   u8g2.setFontMode(1);
@@ -64,72 +63,79 @@ void Glowstick::init() {
   u8g2.drawStr(0, 30, "FW v1.0 by jackw01 <3");
   u8g2.sendBuffer();
 
-  delay(1600);
+  delay(800);
 }
 
 // Update function, called in a loop
 void Glowstick::tick() {
+  // Rate limit the loop
   unsigned long time = millis();
-
-  // Read encoder and button
-  if (encoderDelta != 0) {
-    if (displayState == DisplayStateHSV && editState) { // Editing HSV values
-      hsvValue[currentMenuItem] = constrain(hsvValue[currentMenuItem] +
-                                            encoderDelta * encoderScale, 0, 255);
-    } else if (displayState == DisplayStateWhite && editState) { // Editing white value
-      whiteValue = constrain(whiteValue + encoderDelta * encoderScale, 0, 255);
-    } else if (displayState == DisplayStateGradient && editState) { // Editing gradient
-      gradientValues[currentMenuItem] = constrain(gradientValues[currentMenuItem] +
-                                                  encoderDelta * encoderScale, 0, 255);
-    } else if (displayState == DisplayStateBrightness) { // Adjust brightness
-      displayBrightness = constrain(displayBrightness + encoderDelta * encoderScale,
-                                    0, DisplayBrightnessLimit);
-      u8g2.setContrast((uint8_t)(
-        pow((float)displayBrightness / DisplayBrightnessLimit, 3) * DisplayBrightnessLimit));
-    } else { // Other cases - just change selected item
-      currentMenuItem += encoderDelta;
-      if (currentMenuItem < 0) currentMenuItem = currentMenuLength + currentMenuItem;
-      else if (currentMenuItem >= currentMenuLength) currentMenuItem -= currentMenuLength;
+  if (time - lastUpdate >= UpdateInterval) {
+    // Read encoder and button
+    if (encoderDelta != 0) {
+      if (displayState == DisplayStateHSV && editState) { // Editing HSV values
+        hsvValue[currentMenuItem] = constrain(hsvValue[currentMenuItem] +
+                                              encoderDelta * encoderScale, 0, 255);
+      } else if (displayState == DisplayStateWhite && editState) { // Editing white value
+        whiteValue = constrain(whiteValue + encoderDelta * encoderScale, 0, 255);
+      } else if (displayState == DisplayStateGradient && editState) { // Editing gradient
+        gradientValues[currentMenuItem] = constrain(gradientValues[currentMenuItem] +
+                                                    encoderDelta * encoderScale, 0, 255);
+      } else if (displayState == DisplayStateBrightness) { // Adjust brightness
+        displayBrightness = constrain(displayBrightness + encoderDelta * encoderScale,
+                                      0, DisplayBrightnessLimit);
+        u8g2.setContrast((uint8_t)(
+          pow((float)displayBrightness / DisplayBrightnessLimit, 3) * DisplayBrightnessLimit));
+      } else { // Other cases - just change selected item
+        currentMenuItem += encoderDelta;
+        if (currentMenuItem < 0) currentMenuItem = currentMenuLength + currentMenuItem;
+        else if (currentMenuItem >= currentMenuLength) currentMenuItem -= currentMenuLength;
+      }
+      displayNeedsRedrawing = true;
+      encoderDelta = 0;
     }
-    displayNeedsRedrawing = true;
-    encoderDelta = 0;
-  }
 
-  bool buttonState = !digitalRead(PinEncoderButton);
-  if (buttonState != prevButtonState) {
-    if (time - lastButtonChange > DebounceInterval && buttonState) handleButtonPress();
-    lastButtonChange = time;
-  }
-  prevButtonState = buttonState;
+    bool buttonState = !digitalRead(PinEncoderButton);
+    if (buttonState != prevButtonState) {
+      if (time - lastButtonChange > DebounceInterval && buttonState) handleButtonPress();
+      lastButtonChange = time;
+    }
+    prevButtonState = buttonState;
 
-  // Update LEDs
-  if (displayState == DisplayStateHSV) {
-    CHSV hsv = CHSV(hsvValue[0], hsvValue[1], hsvValue[2]);
-    CRGB rgb;
-    hsv2rgb_rainbow(hsv, rgb);
-    setAllLEDs(CRGBW(rgb.r, rgb.g, rgb.b, 0));
-  } else if (displayState == DisplayStateWhite) {
-    setAllLEDs(CRGBW(0, 0, 0, whiteValue));
-  } else {
-    setAllLEDs(ColorOff);
-  }
+    // Update LEDs
+    if (displayState == DisplayStateHSV) {
+      CHSV hsv = CHSV(hsvValue[0], hsvValue[1], hsvValue[2]);
+      CRGB rgb;
+      hsv2rgb_rainbow(hsv, rgb);
+      setAllLEDs(CRGBW(rgb.r, rgb.g, rgb.b, 0));
+    } else if (displayState == DisplayStateWhite) {
+      setAllLEDs(CRGBW(0, 0, 0, whiteValue));
+    }
 
-  // Redraw display
-  if (displayNeedsRedrawing) {
-    u8g2.clearBuffer();
-    if (displayState == DisplayStateMenu) drawMenu();
-    else if (displayState == DisplayStateHSV) drawHSVControls();
-    else if (displayState == DisplayStateWhite) drawWhiteControls();
-    else if (displayState == DisplayStateGradient) drawGradientControls();
-    else if (displayState == DisplayStateBrightness) drawBrightnessControls();
-    u8g2.sendBuffer();
-    displayNeedsRedrawing = false;
-  }
+    // Ramp brightness up/down
+    if (displayState == DisplayStateMenu ||
+        displayState == DisplayStateAnimation ||
+        displayState == DisplayStateBrightness) {
+      ledTransitionState = max(ledTransitionState - LEDBrightnessRampSpeed, 0);
+    } else {
+      ledTransitionState = min(ledTransitionState + LEDBrightnessRampSpeed, 255);
+    }
+    FastLED.setBrightness(LEDMasterBrightness * ledTransitionState / 255);
+    FastLED.show();
 
-  // Send any data over serial monitor for debugging
-  if (time - lastSerialUpdate > SerialUpdateInterval) {
-    //Serial.println(currentMenuItem);
-    lastSerialUpdate = time;
+    // Redraw display
+    if (displayNeedsRedrawing) {
+      u8g2.clearBuffer();
+      if (displayState == DisplayStateMenu) drawMenu();
+      else if (displayState == DisplayStateHSV) drawHSVControls();
+      else if (displayState == DisplayStateWhite) drawWhiteControls();
+      else if (displayState == DisplayStateGradient) drawGradientControls();
+      else if (displayState == DisplayStateBrightness) drawBrightnessControls();
+      u8g2.sendBuffer();
+      displayNeedsRedrawing = false;
+    }
+
+    lastUpdate = time;
   }
 }
 
@@ -249,5 +255,6 @@ void Glowstick::handleButtonPress() {
 
 void Glowstick::setAllLEDs(CRGBW color) {
   for (uint8_t i = 0; i < LEDCount; i++) leds[i] = color;
-  FastLED.show();
 }
+
+// checkerboard: if ((i / 4) % 2 == 0) leds[i] = color;

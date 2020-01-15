@@ -85,7 +85,7 @@ class Glowstick {
     bool prevButtonState = false;
 
     unsigned long lastButtonChange = 0;
-    unsigned long lastSerialUpdate = 0;
+    unsigned long lastUpdate = 0;
 
     bool displayNeedsRedrawing = true;
     uint8_t displayState = DisplayStateMenu;
@@ -94,6 +94,7 @@ class Glowstick {
     uint8_t scrollOffset = 0;
     bool editState = false;
 
+    uint8_t ledTransitionState = 0;
     uint8_t hsvValue[3] = {128, 255, 64};
     uint8_t whiteValue = 128;
     uint8_t gradientValues[4] = {0, 0, 255, 255}; // Pairs of 2 ints - position and hue

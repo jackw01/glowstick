@@ -9,7 +9,7 @@
 - [x] display brightness control
 - [ ] hsv2rgbw
 - [ ] gradient display
-- [ ] fade in/out
+- [x] fade in/out
 - [ ] master brightness
 - [ ] display timeout control
 - [x] startup screen
