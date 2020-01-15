@@ -14,7 +14,7 @@
 - [ ] display timeout control
 - [x] startup screen
 - [ ] animation menu
-- [ ] variable encoder sensitivity
+- [x] variable encoder sensitivity
 
 ### Extras
 - [ ] image loading from sd card

@@ -12,7 +12,7 @@ const uint8_t PinEncoderB = 4;
 const uint8_t PinEncoderButton = 5;
 
 // LEDs
-const uint8_t LEDCount = 85;
+const uint8_t LEDCount = 84;
 const uint8_t LEDMasterBrightness = 255;
 const CRGBW ColorOff = CRGBW(0, 0, 0, 0);
 
@@ -25,8 +25,9 @@ const uint8_t DisplayBrightnessLimit = 255;
 
 // Encoder / button
 const uint8_t DebounceInterval = 20; // 24 ppr * 20ms = 480ms per rotation min
-const uint8_t EncoderFineAdjustScale = 3;
-const uint8_t EncoderCoarseAdjustScale = 8;
+const uint8_t EncoderCoarseSpeedThreshold = 80; // below this time between pulses, increase speed
+const uint8_t EncoderFineAdjustScale = 1;
+const uint8_t EncoderCoarseAdjustScale = 12;
 
 // Misc
 const uint8_t SerialUpdateInterval = 200;

@@ -94,7 +94,7 @@ class Glowstick {
     uint8_t scrollOffset = 0;
     bool editState = false;
 
-    uint8_t hsvValue[3] = {128, 255, 128};
+    uint8_t hsvValue[3] = {128, 255, 64};
     uint8_t whiteValue = 128;
     uint8_t gradientValues[4] = {0, 0, 255, 255}; // Pairs of 2 ints - position and hue
 

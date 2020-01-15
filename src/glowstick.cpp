@@ -5,14 +5,22 @@
 
 // Encoder interrupt stuff
 static int8_t encoderDelta = 0;
+static int8_t encoderScale = EncoderFineAdjustScale;
 static unsigned long lastEncoderRead = 0;
 
 static void encoderISR() {
   bool b = !digitalRead(PinEncoderB); // Determine whether signal B is high to find direction
   unsigned long time = millis();
-  if (time - lastEncoderRead > DebounceInterval) { // Debounce
+  unsigned long dt = time - lastEncoderRead;
+  if (dt > DebounceInterval) { // Debounce
     if (b) encoderDelta ++;
     else encoderDelta --;
+
+    // Determine new scale factor
+    if (dt < EncoderCoarseSpeedThreshold) encoderScale += 1;
+    else encoderScale -= ceil((dt - EncoderCoarseSpeedThreshold) / EncoderCoarseSpeedThreshold);
+    encoderScale = constrain(encoderScale, EncoderFineAdjustScale, EncoderCoarseAdjustScale);
+
     lastEncoderRead = time;
   }
 }
@@ -28,13 +36,11 @@ void Glowstick::init() {
   pinMode(PinEncoderButton, INPUT_PULLUP);
 
   cli(); // Disable interrupts before attaching and then enable
-  attachInterrupt(digitalPinToInterrupt(PinEncoderA), encoderISR, RISING);
+  // Having the interrupt on RISING/FALLING breaks everything for some reason (cheap encoders?)
+  attachInterrupt(digitalPinToInterrupt(PinEncoderA), encoderISR, LOW);
   sei();
 
-  pinMode(13, OUTPUT);
-  digitalWrite(13, LOW);
-
-  //Serial.begin(115200);
+  Serial.begin(115200);
 
   CRGB *ledsRGB = (CRGB *) &leds[0]; // Hack to get RGBW to work
   FastLED.addLeds<WS2812B, PinLEDs>(ledsRGB, getRGBWSize(LEDCount));
@@ -69,14 +75,14 @@ void Glowstick::tick() {
   if (encoderDelta != 0) {
     if (displayState == DisplayStateHSV && editState) { // Editing HSV values
       hsvValue[currentMenuItem] = constrain(hsvValue[currentMenuItem] +
-                                            encoderDelta * EncoderFineAdjustScale, 0, 255);
+                                            encoderDelta * encoderScale, 0, 255);
     } else if (displayState == DisplayStateWhite && editState) { // Editing white value
-      whiteValue = constrain(whiteValue + encoderDelta * EncoderFineAdjustScale, 0, 255);
+      whiteValue = constrain(whiteValue + encoderDelta * encoderScale, 0, 255);
     } else if (displayState == DisplayStateGradient && editState) { // Editing gradient
       gradientValues[currentMenuItem] = constrain(gradientValues[currentMenuItem] +
-                                                  encoderDelta * EncoderFineAdjustScale, 0, 255);
+                                                  encoderDelta * encoderScale, 0, 255);
     } else if (displayState == DisplayStateBrightness) { // Adjust brightness
-      displayBrightness = constrain(displayBrightness + encoderDelta * EncoderCoarseAdjustScale,
+      displayBrightness = constrain(displayBrightness + encoderDelta * encoderScale,
                                     0, DisplayBrightnessLimit);
       u8g2.setContrast((uint8_t)(
         pow((float)displayBrightness / DisplayBrightnessLimit, 3) * DisplayBrightnessLimit));
