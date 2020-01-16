@@ -1,12 +1,15 @@
-// FastLED_RGBW
-//
-// Hack to enable SK6812 RGBW strips to work with FastLED.
-//
+// glowstick
+// Copyright 2020 jackw01. Released under the MIT License (see LICENSE for details).
+
+#pragma once
+
+#include <stdint.h>
+#include <FastLED.h>
+
+// Hack to get SK6812 RGBW LEDs to work with FastLED
 // Original code by Jim Bumgardner (http://krazydad.com).
 // Modified by David Madison (http://partsnotincluded.com).
 // Further modified by jackw01 (https://github.com/jackw01).
-
-#pragma once
 
 struct CRGBW {
   union {
@@ -48,8 +51,5 @@ struct CRGBW {
   }
 };
 
-inline uint16_t getRGBWSize(uint16_t numLEDs){
-  uint16_t bytes = numLEDs * 4;
-  if(bytes % 3 > 0) return bytes / 3 + 1;
-  else return bytes / 3;
-}
+uint16_t getRGBWSize(uint16_t numLEDs);
+CRGBW hsv2rgbw_rainbow(CHSV hsv);

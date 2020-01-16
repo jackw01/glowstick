@@ -104,10 +104,7 @@ void Glowstick::tick() {
 
     // Update LEDs
     if (displayState == DisplayStateHSV) {
-      CHSV hsv = CHSV(hsvValue[0], hsvValue[1], hsvValue[2]);
-      CRGB rgb;
-      hsv2rgb_rainbow(hsv, rgb);
-      setAllLEDs(CRGBW(rgb.r, rgb.g, rgb.b, 0));
+      setAllLEDs(hsv2rgbw_rainbow(CHSV(hsvValue[0], hsvValue[1], hsvValue[2])));
     } else if (displayState == DisplayStateWhite) {
       setAllLEDs(CRGBW(0, 0, 0, whiteValue));
     }
