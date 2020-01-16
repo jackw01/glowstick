@@ -11,7 +11,7 @@ uint16_t getRGBWSize(uint16_t numLEDs){
 
 // Color manipulations
 // Convert HSV to RGBW with "Rainbow" color transform from FastLED
-CRGBW hsv2rgbw_rainbow(CHSV hsv) {
+CRGBW hsv2rgbw(CHSV hsv, CRGB correction) {
   uint8_t r, g, b, w;
 
   uint8_t offset = hsv.hue & 0x1F; // 0..31
@@ -75,9 +75,8 @@ CRGBW hsv2rgbw_rainbow(CHSV hsv) {
       }
     }
   }
-  /*
-  // Scale down colors if we're desaturated at all
-  // and add the brightness_floor to r, g, and b.
+
+  // Scale down colors if desaturated and add white
   if (hsv.sat != 255) {
     if (hsv.sat == 0) {
       r = 0;
@@ -89,9 +88,10 @@ CRGBW hsv2rgbw_rainbow(CHSV hsv) {
       g = scale8_LEAVING_R1_DIRTY(g, hsv.sat);
       b = scale8_LEAVING_R1_DIRTY(b, hsv.sat);
       w = 255 - hsv.sat;
-      cleanup_R1();
     }
-  }*/
+  } else {
+    w = 0;
+  }
 
   // Now scale everything down if we're at value < 255.
   if (hsv.val != 255) {
@@ -100,13 +100,20 @@ CRGBW hsv2rgbw_rainbow(CHSV hsv) {
       r = 0;
       g = 0;
       b = 0;
+      w = 0;
     } else {
       r = scale8_LEAVING_R1_DIRTY(r, val);
       g = scale8_LEAVING_R1_DIRTY(g, val);
       b = scale8_LEAVING_R1_DIRTY(b, val);
+      w = scale8_LEAVING_R1_DIRTY(w, val);
     }
-    cleanup_R1();
   }
+
+  // Apply color correction here because the builtin method won't work with this hack
+  r = scale8_LEAVING_R1_DIRTY(r, correction.r);
+  g = scale8_LEAVING_R1_DIRTY(g, correction.g);
+  b = scale8_LEAVING_R1_DIRTY(b, correction.b);
+  cleanup_R1();
 
   return CRGBW(r, g, b, w);
 }

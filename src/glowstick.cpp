@@ -40,6 +40,8 @@ void Glowstick::init() {
   attachInterrupt(digitalPinToInterrupt(PinEncoderA), encoderISR, LOW);
   sei();
 
+  //Serial.begin(115200);
+
   CRGB *ledsRGB = (CRGB *) &leds[0]; // Hack to get RGBW to work
   FastLED.addLeds<WS2812B, PinLEDs>(ledsRGB, getRGBWSize(LEDCount));
   FastLED.setBrightness(LEDMasterBrightness);
@@ -104,7 +106,7 @@ void Glowstick::tick() {
 
     // Update LEDs
     if (displayState == DisplayStateHSV) {
-      setAllLEDs(hsv2rgbw_rainbow(CHSV(hsvValue[0], hsvValue[1], hsvValue[2])));
+      setAllLEDs(hsv2rgbw(CHSV(hsvValue[0], hsvValue[1], hsvValue[2]), ColorCorrection));
     } else if (displayState == DisplayStateWhite) {
       setAllLEDs(CRGBW(0, 0, 0, whiteValue));
     }

@@ -52,4 +52,4 @@ struct CRGBW {
 };
 
 uint16_t getRGBWSize(uint16_t numLEDs);
-CRGBW hsv2rgbw_rainbow(CHSV hsv);
+CRGBW hsv2rgbw(CHSV hsv, CRGB correction);

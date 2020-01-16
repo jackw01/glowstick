@@ -7,7 +7,7 @@
 - [x] white brightness input screen
 - [x] hue gradient input screen
 - [x] display brightness control
-- [ ] hsv2rgbw
+- [x] hsv2rgbw
 - [ ] gradient display
 - [x] fade in/out
 - [ ] master brightness
