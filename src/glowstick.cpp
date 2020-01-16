@@ -81,8 +81,10 @@ void Glowstick::tick() {
       } else if (displayState == DisplayStateWhite && editState) { // Editing white value
         whiteValue = constrain(whiteValue + encoderDelta * encoderScale, 0, 255);
       } else if (displayState == DisplayStateGradient && editState) { // Editing gradient
-        gradientValues[currentMenuItem] = constrain(gradientValues[currentMenuItem] +
-                                                    encoderDelta * encoderScale, 0, 255);
+        uint8_t color = currentMenuItem > 2;
+        uint8_t value = currentMenuItem % 3;
+        gradientColors[color][value] = constrain(gradientColors[color][value] +
+                                                 encoderDelta * encoderScale, 0, 255);
       } else if (displayState == DisplayStateBrightness) { // Adjust brightness
         displayBrightness = constrain(displayBrightness + encoderDelta * encoderScale,
                                       0, DisplayBrightnessLimit);
@@ -106,9 +108,11 @@ void Glowstick::tick() {
 
     // Update LEDs
     if (displayState == DisplayStateHSV) {
-      setAllLEDs(hsv2rgbw(CHSV(hsvValue[0], hsvValue[1], hsvValue[2]), ColorCorrection));
+      setAllLEDs(hsv2rgbw(hsvValue, ColorCorrection));
     } else if (displayState == DisplayStateWhite) {
-      setAllLEDs(CRGBW(0, 0, 0, whiteValue));
+      setAllLEDs(RGBW(0, 0, 0, whiteValue));
+    } else if (displayState == DisplayStateGradient) {
+      drawGradient(0, LEDCount, gradientColors[0], gradientColors[1]);
     }
 
     // Ramp brightness up/down
@@ -201,19 +205,21 @@ void Glowstick::drawWhiteControls() {
 
 void Glowstick::drawGradientControls() {
   drawBackButton(currentMenuItem == GradientMenuItemBack);
-  u8g2.drawStr(16, CharacterHeight, "Gradient");
 
   // Sliders
   uint8_t sliderWidth = (u8g2.getDisplayWidth() - 25) / 2 - 2;
-  for (uint8_t i = GradientMenuItemPos1; i <= GradientMenuItemHue2; i++) {
-    drawSlider((i % 2) + 1, 25 + (i > 1 ? sliderWidth : 0), sliderWidth,
-               gradientValues[i], 0, 255,
+  for (uint8_t i = GradientMenuItemHue1; i <= GradientMenuItemVal2; i++) {
+    uint8_t color = i > 2;
+    uint8_t value = i % 3;
+    drawSlider(value, 25 + (color ? sliderWidth : 0), sliderWidth,
+               gradientColors[color][value], 0, 255,
                currentMenuItem == i, currentMenuItem == i && editState);
   }
 
   // Labels
-  u8g2.drawStr(16, CharacterHeight + LineHeight, "P");
-  u8g2.drawStr(16, CharacterHeight + 2 * LineHeight, "H");
+  u8g2.drawStr(16, CharacterHeight, "H");
+  u8g2.drawStr(16, CharacterHeight + LineHeight, "S");
+  u8g2.drawStr(16, CharacterHeight + 2 * LineHeight, "V");
 }
 
 void Glowstick::drawBrightnessControls() {
@@ -252,8 +258,16 @@ void Glowstick::handleButtonPress() {
   displayNeedsRedrawing = true;
 }
 
-void Glowstick::setAllLEDs(CRGBW color) {
+void Glowstick::setAllLEDs(RGBW color) {
   for (uint8_t i = 0; i < LEDCount; i++) leds[i] = color;
+}
+
+void Glowstick::drawGradient(uint8_t startIndex, uint8_t endIndex, HSV start, HSV end) {
+  for (uint8_t i = startIndex; i < endIndex; i++) {
+    leds[i] = hsv2rgbw(HSV(map(i, startIndex, endIndex, start.h, end.h),
+                           map(i, startIndex, endIndex, start.s, end.s),
+                           map(i, startIndex, endIndex, start.v, end.v)), ColorCorrection);
+  }
 }
 
 // checkerboard: if ((i / 4) % 2 == 0) leds[i] = color;

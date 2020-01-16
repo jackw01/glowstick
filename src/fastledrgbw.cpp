@@ -3,6 +3,7 @@
 
 #include "fastledrgbw.hpp"
 
+// Create the CRGB array with extra LEDs to account for the 33% increase in data needed
 uint16_t getRGBWSize(uint16_t numLEDs){
   uint16_t bytes = numLEDs * 4;
   if(bytes % 3 > 0) return bytes / 3 + 1;
@@ -11,7 +12,7 @@ uint16_t getRGBWSize(uint16_t numLEDs){
 
 // Color manipulations
 // Convert HSV to RGBW with "Rainbow" color transform from FastLED
-CRGBW hsv2rgbw(CHSV hsv, CRGB correction) {
+RGBW hsv2rgbw(HSV hsv, CRGB correction) {
   uint8_t r, g, b, w;
 
   uint8_t offset = hsv.hue & 0x1F; // 0..31
@@ -115,6 +116,6 @@ CRGBW hsv2rgbw(CHSV hsv, CRGB correction) {
   b = scale8_LEAVING_R1_DIRTY(b, correction.b);
   cleanup_R1();
 
-  return CRGBW(r, g, b, w);
+  return RGBW(r, g, b, w);
 }
 

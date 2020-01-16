@@ -8,7 +8,8 @@
 - [x] hue gradient input screen
 - [x] display brightness control
 - [x] hsv2rgbw
-- [ ] gradient display
+- [x] gradient display
+- [ ] position control mode
 - [x] fade in/out
 - [ ] master brightness
 - [ ] display timeout control

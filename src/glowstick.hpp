@@ -57,10 +57,12 @@ typedef enum {
 } WhiteMenuItem;
 
 typedef enum {
-  GradientMenuItemPos1,
   GradientMenuItemHue1,
-  GradientMenuItemPos2,
+  GradientMenuItemSat1,
+  GradientMenuItemVal1,
   GradientMenuItemHue2,
+  GradientMenuItemSat2,
+  GradientMenuItemVal2,
   GradientMenuItemBack,
   GradientMenuItems
 } GradientMenuItem;
@@ -78,7 +80,7 @@ class Glowstick {
     void tick();
 
   private:
-    CRGBW leds[LEDCount];
+    RGBW leds[LEDCount];
     U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2 = U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C(U8G2_R2);
 
     uint8_t displayBrightness = EEPROM.read(EEPROMAddrBrightness);
@@ -96,9 +98,9 @@ class Glowstick {
     bool editState = false;
 
     uint8_t ledTransitionState = 0;
-    uint8_t hsvValue[3] = {128, 255, 64};
+    HSV hsvValue = HSV(128, 255, 64);
     uint8_t whiteValue = 128;
-    uint8_t gradientValues[4] = {0, 0, 255, 255}; // Pairs of 2 ints - position and hue
+    HSV gradientColors[2] = {HSV(0, 255, 255), HSV(255, 255, 255)};
 
     void drawMenu();
 
@@ -114,5 +116,6 @@ class Glowstick {
 
     void handleButtonPress();
 
-    void setAllLEDs(CRGBW color);
+    void setAllLEDs(RGBW color);
+    void drawGradient(uint8_t startIndex, uint8_t endIndex, HSV start, HSV end);
 };

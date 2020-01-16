@@ -6,12 +6,67 @@
 #include <stdint.h>
 #include <FastLED.h>
 
+// FastLED does not allow indexing into HSV colors
+struct HSV {
+  union {
+    struct {
+      union {
+        uint8_t hue;
+        uint8_t h;
+      };
+      union {
+        uint8_t saturation;
+        uint8_t sat;
+        uint8_t s;
+      };
+      union {
+        uint8_t value;
+        uint8_t val;
+        uint8_t v;
+      };
+    };
+    uint8_t raw[3];
+  };
+
+  inline uint8_t& operator[] (uint8_t x) __attribute__((always_inline)) {
+    return raw[x];
+  }
+
+  inline const uint8_t& operator[] (uint8_t x) const __attribute__((always_inline)){
+    return raw[x];
+  }
+
+  inline HSV() __attribute__((always_inline)) {}
+
+  inline HSV( uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline))
+    : h(ih), s(is), v(iv) { }
+
+  inline HSV(const HSV& rhs) __attribute__((always_inline)) {
+    h = rhs.h;
+    s = rhs.s;
+    v = rhs.v;
+  }
+
+  inline HSV& operator= (const HSV& rhs) __attribute__((always_inline)) {
+    h = rhs.h;
+    s = rhs.s;
+    v = rhs.v;
+    return *this;
+  }
+
+  inline HSV& setHSV(uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline)) {
+    h = ih;
+    s = is;
+    v = iv;
+    return *this;
+  }
+};
+
 // Hack to get SK6812 RGBW LEDs to work with FastLED
 // Original code by Jim Bumgardner (http://krazydad.com).
 // Modified by David Madison (http://partsnotincluded.com).
 // Further modified by jackw01 (https://github.com/jackw01).
-
-struct CRGBW {
+struct RGBW {
   union {
     struct {
       union {
@@ -34,9 +89,9 @@ struct CRGBW {
     uint8_t raw[4];
   };
 
-  CRGBW(){}
+  RGBW(){}
 
-  CRGBW(uint8_t red, uint8_t green, uint8_t blue, uint8_t white) {
+  RGBW(uint8_t red, uint8_t green, uint8_t blue, uint8_t white) {
     r = red;
     g = green;
     b = blue;
@@ -52,4 +107,4 @@ struct CRGBW {
 };
 
 uint16_t getRGBWSize(uint16_t numLEDs);
-CRGBW hsv2rgbw(CHSV hsv, CRGB correction);
+RGBW hsv2rgbw(HSV hsv, CRGB correction);
