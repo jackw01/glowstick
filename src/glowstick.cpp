@@ -144,17 +144,20 @@ void Glowstick::tick() {
 
 // Drawing utils
 
-void Glowstick::drawScrollingMenu(const char **strings) {
+void Glowstick::drawScrollingMenu(const char * const *strings) {
   uint8_t lastItem = scrollOffset + DisplayLines - 1;
   if (currentMenuItem >= lastItem) scrollOffset += currentMenuItem - lastItem;
   if (currentMenuItem < scrollOffset) scrollOffset = currentMenuItem;
-  for (uint8_t i = 0; i < currentMenuLength; i++) {
+
+  char buffer[MenuStringBufferSize];
+  for (uint8_t i = 0; i < currentMenuLength - scrollOffset; i++) {
     if (i + scrollOffset == currentMenuItem) {
       u8g2.drawTriangle(0, i * LineHeight,
                         8, i * LineHeight + CharacterHeight / 2,
                         0, i * LineHeight + CharacterHeight);
     }
-    u8g2.drawStr(10, CharacterHeight + i * LineHeight, strings[i + scrollOffset]);
+    strcpy_P(buffer, (char *)pgm_read_word(&(strings[i + scrollOffset])));
+    u8g2.drawStr(10, CharacterHeight + i * LineHeight, buffer);
   }
 }
 
@@ -346,7 +349,7 @@ void Glowstick::drawAnimationFrame(uint32_t timeMillis) {
     } else if (currentMenuItem == AnimationScan) {
       leds[i] = (((i + t * LEDCount / 255) % LEDCount) / 6) == 0 ? color : ColorOff;
     } else if (currentMenuItem == AnimationScanMultiple) {
-      leds[i] = ((((i + t * LEDCount / 255) % LEDCount) / 6) % 2) ? color : ColorOff;
+      leds[i] = (((i + t * LEDCount / 255) % LEDCount) / 6) % 2 ? color : ColorOff;
     }
   }
 }

@@ -12,89 +12,7 @@
 
 #include "constants.hpp"
 #include "fastledrgbw.hpp"
-
-// All possible display states ("screens")
-typedef enum {
-  DisplayStateHSV,
-  DisplayStateWhite,
-  DisplayStateGradient,
-  DisplayStateAnimationMenu,
-  DisplayStateBrightness,
-  DisplayStateMenu,
-  DisplayStateAnimation
-} DisplayState;
-
-// Main menu items and MenuItemsMain which represents the number of items
-typedef enum { // Main menu items must match up with respective DisplayStates
-  MenuItemHSV,
-  MenuItemWhite,
-  MenuItemGradient,
-  MenuItemAnimation,
-  MenuItemDisplayBrightness,
-  MainMenuItems
-} MainMenuItem;
-
-// Strings associated with main menu items
-static const char * MainMenuStrings[MainMenuItems] = {
-  "Color",
-  "White",
-  "Gradient",
-  "Animations",
-  "Display Brightness"
-};
-
-// Screen submenu items
-// The back button is always the last item in the menu
-typedef enum {
-  HSVMenuItemH,
-  HSVMenuItemS,
-  HSVMenuItemV,
-  HSVMenuItemBack,
-  HSVMenuItems
-} HSVMenuItem;
-
-typedef enum {
-  WhiteMenuItemBrightness,
-  WhiteMenuItemBack,
-  WhiteMenuItems
-} WhiteMenuItem;
-
-typedef enum {
-  GradientMenuItemHue1,
-  GradientMenuItemSat1,
-  GradientMenuItemVal1,
-  GradientMenuItemHue2,
-  GradientMenuItemSat2,
-  GradientMenuItemVal2,
-  GradientMenuItemBack,
-  GradientMenuItems
-} GradientMenuItem;
-
-typedef enum {
-  AnimationCycleHue,
-  AnimationFlash,
-  AnimationCheckerboard,
-  AnimationScan,
-  AnimationScanMultiple,
-  AnimationMenuItemBack,
-  Animations
-} AnimationMenuItem;
-
-// Strings associated with animation menu items
-static const char *AnimationMenuStrings[Animations] = {
-  "Cycle Hue",
-  "Flash",
-  "Checkerboard",
-  "Scanning Point",
-  "Scanning Points",
-  "Back"
-};
-
-// Lengths of submenus for each DisplayState
-// 0 if the DisplayState does not have a submenu
-const uint8_t MenuLengths[5] {
-  HSVMenuItems, WhiteMenuItems, GradientMenuItems, Animations, 0
-};
+#include "menus.hpp"
 
 class Glowstick {
   public:
@@ -127,7 +45,7 @@ class Glowstick {
     HSV gradientColors[2] = {HSV(0, 255, 255), HSV(255, 255, 255)};
     uint8_t animationSpeed = 32; // 1-255 represents 6/255hz to 6hz
 
-    void drawScrollingMenu(const char **strings);
+    void drawScrollingMenu(const char * const *strings);
     void drawBackButton(bool highlight);
     void drawSlider(uint8_t line, uint8_t left, uint8_t width,
                     uint8_t value, uint8_t min, uint8_t max,
