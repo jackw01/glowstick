@@ -93,6 +93,8 @@ void Glowstick::tick() {
       setAllLEDs(RGBW(0, 0, 0, whiteValue));
     } else if (displayState == DisplayStateGradient) {
       drawGradient(0, LEDCount, gradientColors[0], gradientColors[1]);
+    } else if (displayState == DisplayStateAnimation) {
+      drawAnimationFrame();
     }
 
     // Ramp brightness up/down
@@ -109,11 +111,11 @@ void Glowstick::tick() {
     // Redraw display
     if (displayNeedsRedrawing) {
       u8g2.clearBuffer();
-      if (displayState == DisplayStateMenu) drawMainMenu();
+      if (displayState == DisplayStateMenu) drawScrollingMenu(MainMenuStrings);
       else if (displayState == DisplayStateHSV) drawHSVControls();
       else if (displayState == DisplayStateWhite) drawWhiteControls();
       else if (displayState == DisplayStateGradient) drawGradientControls();
-      else if (displayState == DisplayStateAnimationMenu) drawAnimationMenu();
+      else if (displayState == DisplayStateAnimationMenu) drawScrollingMenu(AnimationMenuStrings);
       else if (displayState == DisplayStateBrightness) drawBrightnessControls();
       else if (displayState == DisplayStateAnimation) drawAnimationControls();
       u8g2.sendBuffer();
@@ -160,10 +162,6 @@ void Glowstick::drawSlider(uint8_t line, uint8_t left, uint8_t width,
 }
 
 // Screens
-
-void Glowstick::drawMainMenu() {
-  drawScrollingMenu(MainMenuStrings);
-}
 
 void Glowstick::drawHSVControls() {
   drawBackButton(currentMenuItem == HSVMenuItemBack);
@@ -212,17 +210,14 @@ void Glowstick::drawGradientControls() {
   u8g2.drawStr(16, CharacterHeight + 2 * LineHeight, "V");
 }
 
-void Glowstick::drawAnimationMenu() {
-  drawBackButton(currentMenuItem == AnimationMenuItemBack);
-}
-
 void Glowstick::drawAnimationControls() {
-
+  drawBackButton(true);
+  u8g2.drawStr(16, CharacterHeight, AnimationMenuStrings[currentMenuItem]);
 }
 
 void Glowstick::drawBrightnessControls() {
   drawBackButton(true);
-  u8g2.drawStr(16, CharacterHeight, "Brightness");
+  u8g2.drawStr(16, CharacterHeight, "Display Brightness");
   drawSlider(1, 16, u8g2.getDisplayWidth() - 16, displayBrightness, 0, DisplayBrightnessLimit,
              true, true);
 }
@@ -272,11 +267,17 @@ void Glowstick::handleButtonPress() {
     if (displayState == DisplayStateBrightness) {
       EEPROM.write(EEPROMAddrBrightness, displayBrightness);
     }
-    // Go back
+    // Go back to main menu, reset parameters
+    // After being on another screen, displayState stores the original menu item
+    currentMenuItem = displayState;
     displayState = DisplayStateMenu;
-    currentMenuItem = 0;
     currentMenuLength = MainMenuItems;
-    scrollOffset = 0;
+  } else if (displayState == DisplayStateAnimationMenu) {
+    // Show animation controls
+    displayState = DisplayStateAnimation;
+  }  else if (displayState == DisplayStateAnimation) {
+    // Back button from animation controls
+    displayState = DisplayStateAnimationMenu;
   }
   displayNeedsRedrawing = true;
 }
@@ -293,6 +294,10 @@ void Glowstick::drawGradient(uint8_t startIndex, uint8_t endIndex, HSV start, HS
                            map(i, startIndex, endIndex, start.s, end.s),
                            map(i, startIndex, endIndex, start.v, end.v)), ColorCorrection);
   }
+}
+
+void Glowstick::drawAnimationFrame() {
+
 }
 
 // checkerboard: if ((i / 4) % 2 == 0) leds[i] = color;

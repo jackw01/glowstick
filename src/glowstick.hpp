@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <math.h>
+#include <avr/pgmspace.h>
 #include <Arduino.h>
 #include <Wire.h>
 #include <EEPROM.h>
@@ -34,7 +35,7 @@ typedef enum { // Main menu items must match up with respective DisplayStates
 } MainMenuItem;
 
 // Strings associated with main menu items
-static const char *MainMenuStrings[5] = {
+static const char * MainMenuStrings[MainMenuItems] = {
   "Color",
   "White",
   "Gradient",
@@ -74,6 +75,12 @@ typedef enum {
   AnimationMenuItemBack,
   Animations
 } AnimationMenuItem;
+
+// Strings associated with animation menu items
+static const char *AnimationMenuStrings[Animations] = {
+  "Cycle Hue",
+  "Back"
+};
 
 // Lengths of submenus for each DisplayState
 // 0 if the DisplayState does not have a submenu
@@ -116,11 +123,9 @@ class Glowstick {
                     uint8_t value, uint8_t min, uint8_t max,
                     bool selected, bool active);
 
-    void drawMainMenu();
     void drawHSVControls();
     void drawWhiteControls();
     void drawGradientControls();
-    void drawAnimationMenu();
     void drawAnimationControls();
     void drawBrightnessControls();
 
@@ -129,4 +134,5 @@ class Glowstick {
 
     void setAllLEDs(RGBW color);
     void drawGradient(uint8_t startIndex, uint8_t endIndex, HSV start, HSV end);
+    void drawAnimationFrame();
 };
