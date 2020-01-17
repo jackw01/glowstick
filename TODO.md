@@ -14,8 +14,10 @@
 - [ ] master brightness
 - [ ] display timeout control
 - [x] startup screen
-- [ ] animation menu
+- [x] animation menu
 - [x] variable encoder sensitivity
+- [x] animation - cycle hue
+- [x] animation - checkerboard
 
 ### Extras
 - [ ] image loading from sd card

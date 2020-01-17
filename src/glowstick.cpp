@@ -6,12 +6,12 @@
 // Encoder interrupt stuff
 static int8_t encoderDelta = 0;
 static int8_t encoderScale = EncoderFineAdjustScale;
-static unsigned long lastEncoderRead = 0;
+static uint32_t lastEncoderRead = 0;
 
 static void encoderISR() {
   bool b = !digitalRead(PinEncoderB); // Determine whether signal B is high to find direction
-  unsigned long time = millis();
-  unsigned long dt = time - lastEncoderRead;
+  uint32_t time = millis();
+  uint32_t dt = time - lastEncoderRead;
   if (dt > DebounceInterval) { // Debounce
     if (b) encoderDelta ++;
     else encoderDelta --;
@@ -23,6 +23,10 @@ static void encoderISR() {
 
     lastEncoderRead = time;
   }
+}
+
+static float mapToFloat(uint8_t in, uint8_t inMin, uint8_t inMax, float outMin, float outMax) {
+  return (float)(in - inMin) * (outMax - outMin) / (float)(inMax - inMin) + outMin;
 }
 
 Glowstick::Glowstick() {
@@ -40,7 +44,7 @@ void Glowstick::init() {
   attachInterrupt(digitalPinToInterrupt(PinEncoderA), encoderISR, LOW);
   sei();
 
-  //Serial.begin(115200);
+  Serial.begin(115200);
 
   CRGB *ledsRGB = (CRGB *) &leds[0]; // Hack to get RGBW to work
   FastLED.addLeds<WS2812B, PinLEDs>(ledsRGB, getRGBWSize(LEDCount));
@@ -71,7 +75,7 @@ void Glowstick::init() {
 // Update function, called in a loop
 void Glowstick::tick() {
   // Rate limit the loop
-  unsigned long time = millis();
+  uint32_t time = millis();
   if (time - lastUpdate >= UpdateInterval) {
     // Read encoder and button
     if (encoderDelta != 0) {
@@ -94,7 +98,7 @@ void Glowstick::tick() {
     } else if (displayState == DisplayStateGradient) {
       drawGradient(0, LEDCount, gradientColors[0], gradientColors[1]);
     } else if (displayState == DisplayStateAnimation) {
-      drawAnimationFrame();
+      drawAnimationFrame(time);
     }
 
     // Ramp brightness up/down
@@ -213,6 +217,11 @@ void Glowstick::drawGradientControls() {
 void Glowstick::drawAnimationControls() {
   drawBackButton(true);
   u8g2.drawStr(16, CharacterHeight, AnimationMenuStrings[currentMenuItem]);
+  drawSlider(1, 16, u8g2.getDisplayWidth() - 16, animationSpeed, 0, 255,
+             true, true);
+  u8g2.setCursor(16, CharacterHeight + 2 * LineHeight);
+  u8g2.print(mapToFloat(animationSpeed, 0, 255, 1.0 / 255.0, 1.0), 3);
+  u8g2.print("Hz");
 }
 
 void Glowstick::drawBrightnessControls() {
@@ -240,6 +249,9 @@ void Glowstick::handleEncoderChange() {
                                   0, DisplayBrightnessLimit);
     u8g2.setContrast((uint8_t)(
       pow((float)displayBrightness / DisplayBrightnessLimit, 3) * DisplayBrightnessLimit));
+  } else if (displayState == DisplayStateAnimation) { // Adjust speed
+    animationSpeed = constrain(animationSpeed + encoderDelta * encoderScale,
+                               0, 255);
   } else { // Other cases - just change selected item
     currentMenuItem += encoderDelta;
     if (currentMenuItem < 0) currentMenuItem = currentMenuLength + currentMenuItem;
@@ -296,8 +308,15 @@ void Glowstick::drawGradient(uint8_t startIndex, uint8_t endIndex, HSV start, HS
   }
 }
 
-void Glowstick::drawAnimationFrame() {
+void Glowstick::drawAnimationFrame(uint32_t timeMillis) {
+  // Get correct time input to animation
+  uint8_t t = (timeMillis * animationSpeed / 1000) % 255;
 
+  for (uint8_t i = 0; i < LEDCount; i++) {
+    if (currentMenuItem == AnimationCycleHue) {
+      leds[i] = hsv2rgbw(HSV(t, 255, 128), ColorCorrection);
+    } else if (currentMenuItem == AnimationCheckerboard) {
+      leds[i] = ((i / 4) % 2 == (t % 8 < 4)) ? hsv2rgbw(hsvValue, ColorCorrection) : ColorOff;
+    }
+  }
 }
-
-// checkerboard: if ((i / 4) % 2 == 0) leds[i] = color;

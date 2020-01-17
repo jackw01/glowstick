@@ -72,6 +72,7 @@ typedef enum {
 
 typedef enum {
   AnimationCycleHue,
+  AnimationCheckerboard,
   AnimationMenuItemBack,
   Animations
 } AnimationMenuItem;
@@ -79,6 +80,7 @@ typedef enum {
 // Strings associated with animation menu items
 static const char *AnimationMenuStrings[Animations] = {
   "Cycle Hue",
+  "Checkerboard",
   "Back"
 };
 
@@ -102,8 +104,8 @@ class Glowstick {
 
     bool prevButtonState = false;
 
-    unsigned long lastButtonChange = 0;
-    unsigned long lastUpdate = 0;
+    uint32_t lastButtonChange = 0;
+    uint32_t lastUpdate = 0;
 
     bool displayNeedsRedrawing = true;
     uint8_t displayState = DisplayStateMenu;
@@ -113,9 +115,10 @@ class Glowstick {
     bool editState = false;
 
     uint8_t ledTransitionState = 0;
-    HSV hsvValue = HSV(128, 255, 64);
+    HSV hsvValue = HSV(128, 255, 255);
     uint8_t whiteValue = 128;
     HSV gradientColors[2] = {HSV(0, 255, 255), HSV(255, 255, 255)};
+    uint8_t animationSpeed = 64; // 1-255 represents 1/255 to 1hz
 
     void drawScrollingMenu(const char **strings);
     void drawBackButton(bool highlight);
@@ -134,5 +137,5 @@ class Glowstick {
 
     void setAllLEDs(RGBW color);
     void drawGradient(uint8_t startIndex, uint8_t endIndex, HSV start, HSV end);
-    void drawAnimationFrame();
+    void drawAnimationFrame(uint32_t timeMillis);
 };
