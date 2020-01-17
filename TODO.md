@@ -16,10 +16,12 @@
 - [x] startup screen
 - [x] animation menu
 - [x] variable encoder sensitivity
-- [x] animation speed curve
 - [x] animation - cycle hue
 - [x] animation - checkerboard
 - [x] animation - flash
+- [x] animation - diagonal scan
+- [ ] save white/color pref for animations
+- [ ] save settings
 
 ### Extras
 - [ ] image loading from sd card
