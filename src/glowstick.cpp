@@ -39,6 +39,18 @@ void Glowstick::init() {
   pinMode(PinEncoderB, INPUT_PULLUP);
   pinMode(PinEncoderButton, INPUT_PULLUP);
 
+  // Init/read EEPROM
+  uint8_t initialized = 0;
+  EEPROM.get(EEPROMAddrInitialization, initialized);
+  if (initialized != 255) {
+    writeEEPROMSettings();
+    EEPROM.write(EEPROMAddrInitialization, 255);
+  } else {
+    EEPROM.get(EEPROMAddrHSVValue, hsvValue);
+    EEPROM.get(EEPROMAddrWhiteValue, whiteValue);
+    EEPROM.get(EEPROMAddrDisplayBrightness, displayBrightness);
+  }
+
   cli(); // Disable interrupts before attaching and then enable
   // Having the interrupt on RISING/FALLING breaks everything for some reason (cheap encoders?)
   attachInterrupt(digitalPinToInterrupt(PinEncoderA), encoderISR, LOW);
@@ -276,8 +288,11 @@ void Glowstick::handleButtonPress() {
   } else if (currentMenuItem == currentMenuLength - 1 || // Is back button (always last item)
              displayState == DisplayStateBrightness) {
     // Save settings for some states
-    if (displayState == DisplayStateBrightness) {
-      EEPROM.write(EEPROMAddrBrightness, displayBrightness);
+    writeEEPROMSettings();
+    if (displayState == DisplayStateHSV) {
+      whiteSelected = false;
+    } else if (displayState == DisplayStateWhite) {
+      whiteSelected = true;
     }
     // Go back to main menu, reset parameters
     // After being on another screen, displayState stores the original menu item
@@ -292,6 +307,14 @@ void Glowstick::handleButtonPress() {
     displayState = DisplayStateAnimationMenu;
   }
   displayNeedsRedrawing = true;
+}
+
+// EEPROM
+
+void Glowstick::writeEEPROMSettings() {
+  EEPROM.put(EEPROMAddrHSVValue, hsvValue);
+  EEPROM.put(EEPROMAddrWhiteValue, whiteValue);
+  EEPROM.put(EEPROMAddrDisplayBrightness, displayBrightness);
 }
 
 // LED drawing
@@ -311,7 +334,7 @@ void Glowstick::drawGradient(uint8_t startIndex, uint8_t endIndex, HSV start, HS
 void Glowstick::drawAnimationFrame(uint32_t timeMillis) {
   // Get correct time input to animation and selected color
   uint8_t t = (timeMillis * (animationSpeed * 6) / 1000) % 255;
-  RGBW color = hsv2rgbw(hsvValue, ColorCorrection);
+  RGBW color = whiteSelected ? RGBW(0, 0, 0, whiteValue) : hsv2rgbw(hsvValue, ColorCorrection);
 
   for (uint8_t i = 0; i < LEDCount; i++) {
     if (currentMenuItem == AnimationCycleHue) {

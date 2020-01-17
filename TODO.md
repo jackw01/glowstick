@@ -20,8 +20,8 @@
 - [x] animation - checkerboard
 - [x] animation - flash
 - [x] animation - diagonal scan
-- [ ] save white/color pref for animations
-- [ ] save settings
+- [x] save white/color pref for animations
+- [x] save settings eeprom
 
 ### Extras
 - [ ] image loading from sd card

@@ -35,4 +35,7 @@ const uint8_t EncoderCoarseAdjustScale = 12; // maximum adjustment speed
 const uint8_t UpdateInterval = 20; // ms per frame
 
 // EEPROM Settings
-const uint16_t EEPROMAddrBrightness = 0;
+const uint16_t EEPROMAddrInitialization = 0;
+const uint16_t EEPROMAddrDisplayBrightness = 1;
+const uint16_t EEPROMAddrHSVValue = 2;
+const uint16_t EEPROMAddrWhiteValue = 5; // 3 bytes for hsv

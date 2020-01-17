@@ -106,7 +106,7 @@ class Glowstick {
     RGBW leds[LEDCount];
     U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2 = U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C(U8G2_R2);
 
-    uint8_t displayBrightness = EEPROM.read(EEPROMAddrBrightness);
+    uint8_t displayBrightness = 96;
 
     bool prevButtonState = false;
 
@@ -123,6 +123,7 @@ class Glowstick {
     uint8_t ledTransitionState = 0;
     HSV hsvValue = HSV(128, 255, 255);
     uint8_t whiteValue = 128;
+    bool whiteSelected = false; // was white last selected (for animations)
     HSV gradientColors[2] = {HSV(0, 255, 255), HSV(255, 255, 255)};
     uint8_t animationSpeed = 32; // 1-255 represents 6/255hz to 6hz
 
@@ -140,6 +141,8 @@ class Glowstick {
 
     void handleEncoderChange();
     void handleButtonPress();
+
+    void writeEEPROMSettings();
 
     void setAllLEDs(RGBW color);
     void drawGradient(uint8_t startIndex, uint8_t endIndex, HSV start, HSV end);
