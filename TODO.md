@@ -16,8 +16,10 @@
 - [x] startup screen
 - [x] animation menu
 - [x] variable encoder sensitivity
+- [x] animation speed curve
 - [x] animation - cycle hue
 - [x] animation - checkerboard
+- [x] animation - flash
 
 ### Extras
 - [ ] image loading from sd card

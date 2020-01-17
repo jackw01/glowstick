@@ -29,6 +29,10 @@ static float mapToFloat(uint8_t in, uint8_t inMin, uint8_t inMax, float outMin, 
   return (float)(in - inMin) * (outMax - outMin) / (float)(inMax - inMin) + outMin;
 }
 
+static uint8_t scaleSpeed(uint8_t in) {
+  return in * in / 255;
+}
+
 Glowstick::Glowstick() {
 }
 
@@ -44,7 +48,7 @@ void Glowstick::init() {
   attachInterrupt(digitalPinToInterrupt(PinEncoderA), encoderISR, LOW);
   sei();
 
-  Serial.begin(115200);
+  //Serial.begin(115200);
 
   CRGB *ledsRGB = (CRGB *) &leds[0]; // Hack to get RGBW to work
   FastLED.addLeds<WS2812B, PinLEDs>(ledsRGB, getRGBWSize(LEDCount));
@@ -220,7 +224,7 @@ void Glowstick::drawAnimationControls() {
   drawSlider(1, 16, u8g2.getDisplayWidth() - 16, animationSpeed, 0, 255,
              true, true);
   u8g2.setCursor(16, CharacterHeight + 2 * LineHeight);
-  u8g2.print(mapToFloat(animationSpeed, 0, 255, 1.0 / 255.0, 1.0), 3);
+  u8g2.print(mapToFloat(scaleSpeed(animationSpeed), 0, 255, 8.0 / 255.0, 8.0), 3);
   u8g2.print("Hz");
 }
 
@@ -310,11 +314,13 @@ void Glowstick::drawGradient(uint8_t startIndex, uint8_t endIndex, HSV start, HS
 
 void Glowstick::drawAnimationFrame(uint32_t timeMillis) {
   // Get correct time input to animation
-  uint8_t t = (timeMillis * animationSpeed / 1000) % 255;
+  uint8_t t = (timeMillis * (scaleSpeed(animationSpeed) * 8) / 1000) % 255;
 
   for (uint8_t i = 0; i < LEDCount; i++) {
     if (currentMenuItem == AnimationCycleHue) {
       leds[i] = hsv2rgbw(HSV(t, 255, 128), ColorCorrection);
+    } else if (currentMenuItem == AnimationFlash) {
+      leds[i] = t < 128 ? hsv2rgbw(hsvValue, ColorCorrection) : ColorOff;
     } else if (currentMenuItem == AnimationCheckerboard) {
       leds[i] = ((i / 4) % 2 == (t % 8 < 4)) ? hsv2rgbw(hsvValue, ColorCorrection) : ColorOff;
     }
