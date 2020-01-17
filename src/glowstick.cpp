@@ -75,27 +75,7 @@ void Glowstick::tick() {
   if (time - lastUpdate >= UpdateInterval) {
     // Read encoder and button
     if (encoderDelta != 0) {
-      if (displayState == DisplayStateHSV && editState) { // Editing HSV values
-        hsvValue[currentMenuItem] = constrain(hsvValue[currentMenuItem] +
-                                              encoderDelta * encoderScale, 0, 255);
-      } else if (displayState == DisplayStateWhite && editState) { // Editing white value
-        whiteValue = constrain(whiteValue + encoderDelta * encoderScale, 0, 255);
-      } else if (displayState == DisplayStateGradient && editState) { // Editing gradient
-        uint8_t color = currentMenuItem > 2;
-        uint8_t value = currentMenuItem % 3;
-        gradientColors[color][value] = constrain(gradientColors[color][value] +
-                                                 encoderDelta * encoderScale, 0, 255);
-      } else if (displayState == DisplayStateBrightness) { // Adjust brightness
-        displayBrightness = constrain(displayBrightness + encoderDelta * encoderScale,
-                                      0, DisplayBrightnessLimit);
-        u8g2.setContrast((uint8_t)(
-          pow((float)displayBrightness / DisplayBrightnessLimit, 3) * DisplayBrightnessLimit));
-      } else { // Other cases - just change selected item
-        currentMenuItem += encoderDelta;
-        if (currentMenuItem < 0) currentMenuItem = currentMenuLength + currentMenuItem;
-        else if (currentMenuItem >= currentMenuLength) currentMenuItem -= currentMenuLength;
-      }
-      displayNeedsRedrawing = true;
+      handleEncoderChange();
       encoderDelta = 0;
     }
 
@@ -117,7 +97,7 @@ void Glowstick::tick() {
 
     // Ramp brightness up/down
     if (displayState == DisplayStateMenu ||
-        displayState == DisplayStateAnimation ||
+        displayState == DisplayStateAnimationMenu ||
         displayState == DisplayStateBrightness) {
       ledTransitionState = max(ledTransitionState - LEDBrightnessRampSpeed, 0);
     } else {
@@ -129,11 +109,13 @@ void Glowstick::tick() {
     // Redraw display
     if (displayNeedsRedrawing) {
       u8g2.clearBuffer();
-      if (displayState == DisplayStateMenu) drawMenu();
+      if (displayState == DisplayStateMenu) drawMainMenu();
       else if (displayState == DisplayStateHSV) drawHSVControls();
       else if (displayState == DisplayStateWhite) drawWhiteControls();
       else if (displayState == DisplayStateGradient) drawGradientControls();
+      else if (displayState == DisplayStateAnimationMenu) drawAnimationMenu();
       else if (displayState == DisplayStateBrightness) drawBrightnessControls();
+      else if (displayState == DisplayStateAnimation) drawAnimationControls();
       u8g2.sendBuffer();
       displayNeedsRedrawing = false;
     }
@@ -142,17 +124,19 @@ void Glowstick::tick() {
   }
 }
 
-void Glowstick::drawMenu() {
+// Drawing utils
+
+void Glowstick::drawScrollingMenu(const char **strings) {
   uint8_t lastItem = scrollOffset + DisplayLines - 1;
   if (currentMenuItem >= lastItem) scrollOffset += currentMenuItem - lastItem;
   if (currentMenuItem < scrollOffset) scrollOffset = currentMenuItem;
-  for (uint8_t i = 0; i < MainMenuItems; i++) {
+  for (uint8_t i = 0; i < currentMenuLength; i++) {
     if (i + scrollOffset == currentMenuItem) {
       u8g2.drawTriangle(0, i * LineHeight,
                         8, i * LineHeight + CharacterHeight / 2,
                         0, i * LineHeight + CharacterHeight);
     }
-    u8g2.drawStr(10, CharacterHeight + i * LineHeight, MenuStringsMain[i + scrollOffset]);
+    u8g2.drawStr(10, CharacterHeight + i * LineHeight, strings[i + scrollOffset]);
   }
 }
 
@@ -173,6 +157,12 @@ void Glowstick::drawSlider(uint8_t line, uint8_t left, uint8_t width,
   if (active) {
     u8g2.drawBox(left + 2 + barLength - 1, 3 + line * LineHeight, 3, CharacterHeight - 6);
   } else u8g2.drawBox(left + 2, 3 + line * LineHeight, barLength, CharacterHeight - 6);
+}
+
+// Screens
+
+void Glowstick::drawMainMenu() {
+  drawScrollingMenu(MainMenuStrings);
 }
 
 void Glowstick::drawHSVControls() {
@@ -222,11 +212,45 @@ void Glowstick::drawGradientControls() {
   u8g2.drawStr(16, CharacterHeight + 2 * LineHeight, "V");
 }
 
+void Glowstick::drawAnimationMenu() {
+  drawBackButton(currentMenuItem == AnimationMenuItemBack);
+}
+
+void Glowstick::drawAnimationControls() {
+
+}
+
 void Glowstick::drawBrightnessControls() {
   drawBackButton(true);
   u8g2.drawStr(16, CharacterHeight, "Brightness");
   drawSlider(1, 16, u8g2.getDisplayWidth() - 16, displayBrightness, 0, DisplayBrightnessLimit,
              true, true);
+}
+
+// Input handlers
+
+void Glowstick::handleEncoderChange() {
+  if (displayState == DisplayStateHSV && editState) { // Editing HSV values
+    hsvValue[currentMenuItem] = constrain(hsvValue[currentMenuItem] +
+                                          encoderDelta * encoderScale, 0, 255);
+  } else if (displayState == DisplayStateWhite && editState) { // Editing white value
+    whiteValue = constrain(whiteValue + encoderDelta * encoderScale, 0, 255);
+  } else if (displayState == DisplayStateGradient && editState) { // Editing gradient
+    uint8_t color = currentMenuItem > 2;
+    uint8_t value = currentMenuItem % 3;
+    gradientColors[color][value] = constrain(gradientColors[color][value] +
+                                              encoderDelta * encoderScale, 0, 255);
+  } else if (displayState == DisplayStateBrightness) { // Adjust brightness
+    displayBrightness = constrain(displayBrightness + encoderDelta * encoderScale,
+                                  0, DisplayBrightnessLimit);
+    u8g2.setContrast((uint8_t)(
+      pow((float)displayBrightness / DisplayBrightnessLimit, 3) * DisplayBrightnessLimit));
+  } else { // Other cases - just change selected item
+    currentMenuItem += encoderDelta;
+    if (currentMenuItem < 0) currentMenuItem = currentMenuLength + currentMenuItem;
+    else if (currentMenuItem >= currentMenuLength) currentMenuItem -= currentMenuLength;
+  }
+  displayNeedsRedrawing = true;
 }
 
 void Glowstick::handleButtonPress() {
@@ -236,14 +260,13 @@ void Glowstick::handleButtonPress() {
     currentMenuItem = 0;
     currentMenuLength = MenuLengths[displayState];
     editState = false;
-  } else if ((displayState == DisplayStateHSV && currentMenuItem != HSVMenuItemBack) ||
-             (displayState == DisplayStateWhite && currentMenuItem != WhiteMenuItemBack) ||
-             (displayState == DisplayStateGradient && currentMenuItem != GradientMenuItemBack)) {
+  } else if (currentMenuItem < currentMenuLength - 1 && ( // Not back button
+             displayState == DisplayStateHSV ||
+             displayState == DisplayStateWhite ||
+             displayState == DisplayStateGradient)) {
     // Change edit state in modes with multiple selectable fields
     editState = !editState;
-  } else if ((displayState == DisplayStateHSV && currentMenuItem == HSVMenuItemBack) ||
-             (displayState == DisplayStateWhite && currentMenuItem == WhiteMenuItemBack) ||
-             (displayState == DisplayStateGradient && currentMenuItem == GradientMenuItemBack) ||
+  } else if (currentMenuItem == currentMenuLength - 1 || // Is back button (always last item)
              displayState == DisplayStateBrightness) {
     // Save settings for some states
     if (displayState == DisplayStateBrightness) {
@@ -257,6 +280,8 @@ void Glowstick::handleButtonPress() {
   }
   displayNeedsRedrawing = true;
 }
+
+// LED drawing
 
 void Glowstick::setAllLEDs(RGBW color) {
   for (uint8_t i = 0; i < LEDCount; i++) leds[i] = color;

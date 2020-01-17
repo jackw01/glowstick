@@ -17,9 +17,10 @@ typedef enum {
   DisplayStateHSV,
   DisplayStateWhite,
   DisplayStateGradient,
-  DisplayStateAnimation,
+  DisplayStateAnimationMenu,
   DisplayStateBrightness,
-  DisplayStateMenu
+  DisplayStateMenu,
+  DisplayStateAnimation
 } DisplayState;
 
 // Main menu items and MenuItemsMain which represents the number of items
@@ -33,8 +34,8 @@ typedef enum { // Main menu items must match up with respective DisplayStates
 } MainMenuItem;
 
 // Strings associated with main menu items
-static const char *MenuStringsMain[5] = {
-  "HSV",
+static const char *MainMenuStrings[5] = {
+  "Color",
   "White",
   "Gradient",
   "Animations",
@@ -42,6 +43,7 @@ static const char *MenuStringsMain[5] = {
 };
 
 // Screen submenu items
+// The back button is always the last item in the menu
 typedef enum {
   HSVMenuItemH,
   HSVMenuItemS,
@@ -67,10 +69,16 @@ typedef enum {
   GradientMenuItems
 } GradientMenuItem;
 
+typedef enum {
+  AnimationCycleHue,
+  AnimationMenuItemBack,
+  Animations
+} AnimationMenuItem;
+
 // Lengths of submenus for each DisplayState
 // 0 if the DisplayState does not have a submenu
 const uint8_t MenuLengths[5] {
-  HSVMenuItems, WhiteMenuItems, GradientMenuItems, 0, 0
+  HSVMenuItems, WhiteMenuItems, GradientMenuItems, Animations, 0
 };
 
 class Glowstick {
@@ -102,18 +110,21 @@ class Glowstick {
     uint8_t whiteValue = 128;
     HSV gradientColors[2] = {HSV(0, 255, 255), HSV(255, 255, 255)};
 
-    void drawMenu();
-
+    void drawScrollingMenu(const char **strings);
     void drawBackButton(bool highlight);
     void drawSlider(uint8_t line, uint8_t left, uint8_t width,
                     uint8_t value, uint8_t min, uint8_t max,
                     bool selected, bool active);
 
+    void drawMainMenu();
     void drawHSVControls();
     void drawWhiteControls();
     void drawGradientControls();
+    void drawAnimationMenu();
+    void drawAnimationControls();
     void drawBrightnessControls();
 
+    void handleEncoderChange();
     void handleButtonPress();
 
     void setAllLEDs(RGBW color);
