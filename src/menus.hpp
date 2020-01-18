@@ -96,6 +96,13 @@ const char * const AnimationMenuStrings[] PROGMEM = {
   AnimationMenu06
 };
 
+typedef enum : uint8_t {
+  AnimationControlMenuItemSpeed,
+  AnimationControlMenuItemScale,
+  AnimationControlMenuItemBack,
+  AnimationControlMenuItems
+} AnimationControlMenuItem;
+
 // Lengths of submenus for each DisplayState
 // 0 if the DisplayState does not have a submenu
 const uint8_t MenuLengths[5] {

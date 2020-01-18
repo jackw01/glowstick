@@ -44,7 +44,10 @@ class Glowstick {
     uint8_t whiteValue = 128;
     bool whiteSelected = false; // was white last selected (for animations)
     HSV gradientColors[2] = {HSV(0, 255, 255), HSV(255, 255, 255)};
-    uint8_t animationSpeed = 32; // 1-255 represents 6/255hz to 6hz
+
+    uint8_t currentAnimation = 0;
+    // Speed and scale (1-255 represents 6/255hz to 6hz; 0-255 represents 0-???)
+    uint8_t animationParams[2] = {32, 128};
 
     void drawScrollingMenu(const char * const *strings);
     void drawBackButton(bool highlight);

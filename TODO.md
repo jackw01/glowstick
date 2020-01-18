@@ -21,6 +21,9 @@
 - [x] animation - diagonal scan
 - [x] save white/color pref for animations
 - [x] save settings eeprom
+- [x] animation scaling
+- [ ] animation - fix integer math bugs
+- [ ] animation - fire
 - [ ] position control mode
 
 ### Extras

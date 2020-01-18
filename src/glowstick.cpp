@@ -238,12 +238,20 @@ void Glowstick::drawGradientControls() {
 }
 
 void Glowstick::drawAnimationControls() {
-  drawBackButton(true);
-  u8g2.drawStr(16, CharacterHeight, AnimationMenuStrings[currentMenuItem]);
-  drawSlider(1, 16, u8g2.getDisplayWidth() - 16, animationSpeed, 0, 255,
-             true, true);
-  u8g2.setCursor(16, CharacterHeight + 2 * LineHeight);
-  u8g2.print(mapToFloat(animationSpeed, 1, 255, 6.0 / 255.0, 6.0), 3);
+  drawBackButton(currentMenuItem == AnimationControlMenuItemBack);
+  u8g2.drawStr(16, CharacterHeight, "Animation");
+
+  // Sliders
+  for (uint8_t i = 0; i <= 1; i++) {
+    drawSlider(i + 1, 48, u8g2.getDisplayWidth() - 48, animationParams[i], 0, 255,
+               currentMenuItem == i, currentMenuItem == i && editState);
+  }
+
+  // Labels
+  u8g2.drawStr(16, CharacterHeight + LineHeight, "Speed");
+  u8g2.drawStr(16, CharacterHeight + 2 * LineHeight, "Scale");
+  u8g2.setCursor(u8g2.getDisplayWidth() - 40, CharacterHeight);
+  u8g2.print(mapToFloat(animationParams[0], 1, 255, 6.0 / 255.0, 6.0), 3);
   u8g2.print("Hz");
 }
 
@@ -268,12 +276,11 @@ void Glowstick::handleEncoderChange() {
     gradientColors[color][value] = constrain(gradientColors[color][value] +
                                               encoderDelta * encoderScale, 0, 255);
   } else if (displayState == DisplayStateBrightness) { // Adjust brightness
-    displayBrightness = constrain(displayBrightness + encoderDelta * encoderScale,
-                                  0, 255);
+    displayBrightness = constrain(displayBrightness + encoderDelta * encoderScale, 0, 255);
     setScaledDisplayBrightness();
-  } else if (displayState == DisplayStateAnimation) { // Adjust speed
-    animationSpeed = constrain(animationSpeed + encoderDelta * encoderScale,
-                               1, 255);
+  } else if (displayState == DisplayStateAnimation && editState) { // Adjust speed
+    animationParams[currentMenuItem] = constrain(animationParams[currentMenuItem] +
+                                                 encoderDelta * encoderScale, 1, 255);
   } else { // Other cases - just change selected item
     currentMenuItem += encoderDelta;
     if (currentMenuItem < 0) currentMenuItem = currentMenuLength + currentMenuItem;
@@ -292,10 +299,12 @@ void Glowstick::handleButtonPress() {
   } else if (currentMenuItem < currentMenuLength - 1 && ( // Not back button
              displayState == DisplayStateHSV ||
              displayState == DisplayStateWhite ||
-             displayState == DisplayStateGradient)) {
+             displayState == DisplayStateGradient ||
+             displayState == DisplayStateAnimation)) {
     // Change edit state in modes with multiple selectable fields
     editState = !editState;
-  } else if (currentMenuItem == currentMenuLength - 1 || // Is back button (always last item)
+  } else if ((currentMenuItem == currentMenuLength - 1
+              && displayState != DisplayStateAnimation) || // Is back button (always last item)
              displayState == DisplayStateBrightness) {
     // Save settings for some states
     writeEEPROMSettings();
@@ -312,9 +321,15 @@ void Glowstick::handleButtonPress() {
   } else if (displayState == DisplayStateAnimationMenu) {
     // Show animation controls
     displayState = DisplayStateAnimation;
-  }  else if (displayState == DisplayStateAnimation) {
+    currentAnimation = currentMenuItem;
+    currentMenuItem = 0;
+    currentMenuLength = AnimationControlMenuItems;
+    editState = false;
+  } else if (displayState == DisplayStateAnimation) {
     // Back button from animation controls
     displayState = DisplayStateAnimationMenu;
+    currentMenuItem = currentAnimation;
+    currentMenuLength = MenuLengths[displayState];
   }
   displayNeedsRedrawing = true;
 }
@@ -344,20 +359,21 @@ void Glowstick::drawGradient(uint8_t startIndex, uint8_t endIndex, HSV start, HS
 
 void Glowstick::drawAnimationFrame(uint32_t timeMillis) {
   // Get correct time input to animation and selected color
-  uint8_t t = (timeMillis * (animationSpeed * 6) / 1000) % 255;
+  uint8_t t = (timeMillis * (animationParams[0] * 6) / 1000) % 255;
   RGBW color = whiteSelected ? RGBW(0, 0, 0, whiteValue) : hsv2rgbw(hsvValue, ColorCorrection);
 
   for (uint8_t i = 0; i < LEDCount; i++) {
-    if (currentMenuItem == AnimationCycleHue) {
-      leds[i] = hsv2rgbw(HSV(t, 255, 128), ColorCorrection);
-    } else if (currentMenuItem == AnimationFlash) {
-      leds[i] = t < 128 ? color : ColorOff;
-    } else if (currentMenuItem == AnimationCheckerboard) {
-      leds[i] = ((i / 6) % 2 == (t % 8 < 4)) ? color : ColorOff;
-    } else if (currentMenuItem == AnimationScan) {
-      leds[i] = (((i + t * LEDCount / 255) % LEDCount) / 6) == 0 ? color : ColorOff;
-    } else if (currentMenuItem == AnimationScanMultiple) {
-      leds[i] = (((i + t * LEDCount / 255) % LEDCount) / 6) % 2 ? color : ColorOff;
+    uint8_t x = i * animationParams[1] / LEDCount; // Get scaled position
+    if (currentAnimation == AnimationCycleHue) {
+      leds[i] = hsv2rgbw(HSV(t + x, 255, 128), ColorCorrection);
+    } else if (currentAnimation == AnimationFlash) {
+      leds[i] = (t + x) % 255 < 128 ? color : ColorOff;
+    } else if (currentAnimation == AnimationCheckerboard) {
+      leds[i] = ((x / 6) % 2 == (t % 64 < 32)) ? color : ColorOff;
+    } else if (currentAnimation == AnimationScan) {
+      leds[i] = (((x + t * LEDCount / 255) % LEDCount) / 6) == 0 ? color : ColorOff;
+    } else if (currentAnimation == AnimationScanMultiple) {
+      leds[i] = (((x + t * LEDCount / 255) % LEDCount) / 6) % 2 ? color : ColorOff;
     }
   }
 }
