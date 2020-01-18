@@ -22,8 +22,8 @@ const CRGB ColorCorrection = CRGB(255, 176, 240);
 const uint8_t CharacterHeight = 8;
 const uint8_t LineHeight = 11;
 const uint8_t DisplayLines = 3;
-const uint16_t BlinkInterval = 500;
 const uint8_t DisplayBrightnessLimit = 255;
+const uint16_t DisplayTimeout = 20000; // ms
 
 // Encoder / button
 const uint8_t DebounceInterval = 20; // 24 ppr * 20ms = 480ms per rotation min
@@ -35,7 +35,7 @@ const uint8_t EncoderCoarseAdjustScale = 12; // maximum adjustment speed
 const uint8_t UpdateInterval = 20; // ms per frame
 
 // EEPROM Settings
-const uint16_t EEPROMAddrInitialization = 0;
-const uint16_t EEPROMAddrDisplayBrightness = 1;
-const uint16_t EEPROMAddrHSVValue = 2;
-const uint16_t EEPROMAddrWhiteValue = 5; // 3 bytes for hsv
+const uint8_t EEPROMAddrInitialization = 0;
+const uint8_t EEPROMAddrDisplayBrightness = 1;
+const uint8_t EEPROMAddrHSVValue = 2;
+const uint8_t EEPROMAddrWhiteValue = 5; // 3 bytes for hsv

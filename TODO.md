@@ -10,9 +10,8 @@
 - [x] hsv2rgbw
 - [x] gradient display
 - [ ] position control mode
+- [x] display timeout
 - [x] fade in/out
-- [ ] master brightness
-- [ ] display timeout control
 - [x] startup screen
 - [x] animation menu
 - [x] variable encoder sensitivity

@@ -136,6 +136,9 @@ void Glowstick::tick() {
       else if (displayState == DisplayStateAnimation) drawAnimationControls();
       u8g2.sendBuffer();
       displayNeedsRedrawing = false;
+      lastDisplayUpdate = time;
+    } else if (time - lastDisplayUpdate > DisplayTimeout) {
+      u8g2.clear();
     }
 
     lastUpdate = time;

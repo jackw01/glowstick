@@ -30,7 +30,9 @@ class Glowstick {
 
     uint32_t lastButtonChange = 0;
     uint32_t lastUpdate = 0;
+    uint32_t lastDisplayUpdate = 0;
 
+    bool displayOn = true;
     bool displayNeedsRedrawing = true;
     uint8_t displayState = DisplayStateMenu;
     int8_t currentMenuItem = 0;
