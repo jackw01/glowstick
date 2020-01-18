@@ -22,7 +22,6 @@ const CRGB ColorCorrection = CRGB(255, 176, 240);
 const uint8_t CharacterHeight = 8;
 const uint8_t LineHeight = 11;
 const uint8_t DisplayLines = 3;
-const uint8_t DisplayBrightnessLimit = 255;
 const uint16_t DisplayTimeout = 20000; // ms
 
 // Encoder / button

@@ -24,14 +24,13 @@ class Glowstick {
     RGBW leds[LEDCount];
     U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2 = U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C(U8G2_R2);
 
-    uint8_t displayBrightness = 96;
-
     bool prevButtonState = false;
 
     uint32_t lastButtonChange = 0;
     uint32_t lastUpdate = 0;
     uint32_t lastDisplayUpdate = 0;
 
+    uint8_t displayBrightness = 96;
     bool displayOn = true;
     bool displayNeedsRedrawing = true;
     uint8_t displayState = DisplayStateMenu;
@@ -52,6 +51,7 @@ class Glowstick {
     void drawSlider(uint8_t line, uint8_t left, uint8_t width,
                     uint8_t value, uint8_t min, uint8_t max,
                     bool selected, bool active);
+    void setScaledDisplayBrightness();
 
     void drawHSVControls();
     void drawWhiteControls();

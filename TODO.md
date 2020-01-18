@@ -9,7 +9,7 @@
 - [x] display brightness control
 - [x] hsv2rgbw
 - [x] gradient display
-- [ ] position control mode
+- [x] gradient wrapping
 - [x] display timeout
 - [x] fade in/out
 - [x] startup screen
@@ -21,6 +21,7 @@
 - [x] animation - diagonal scan
 - [x] save white/color pref for animations
 - [x] save settings eeprom
+- [ ] position control mode
 
 ### Extras
 - [ ] image loading from sd card

@@ -72,7 +72,7 @@ void Glowstick::init() {
   u8x8_cad_SendCmd(u8g2.getU8x8(), 0x0db);
   u8x8_cad_SendArg(u8g2.getU8x8(), 0 << 4); // Replace 0 with Vcom deselect value 0 to 7
   u8x8_cad_EndTransfer(u8g2.getU8x8());
-  u8g2.setContrast(displayBrightness);
+  setScaledDisplayBrightness();
 
   // Display startup screen
   u8g2.setFont(u8g2_font_logisoso16_tr);
@@ -183,6 +183,11 @@ void Glowstick::drawSlider(uint8_t line, uint8_t left, uint8_t width,
   } else u8g2.drawBox(left + 2, 3 + line * LineHeight, barLength, CharacterHeight - 6);
 }
 
+void Glowstick::setScaledDisplayBrightness() {
+  // Apply cubic curve to make brightness control seem more linear
+  u8g2.setContrast((uint32_t)displayBrightness * displayBrightness * displayBrightness / 65025);
+}
+
 // Screens
 
 void Glowstick::drawHSVControls() {
@@ -245,7 +250,7 @@ void Glowstick::drawAnimationControls() {
 void Glowstick::drawBrightnessControls() {
   drawBackButton(true);
   u8g2.drawStr(16, CharacterHeight, "Display Brightness");
-  drawSlider(1, 16, u8g2.getDisplayWidth() - 16, displayBrightness, 0, DisplayBrightnessLimit,
+  drawSlider(1, 16, u8g2.getDisplayWidth() - 16, displayBrightness, 0, 255,
              true, true);
 }
 
@@ -264,9 +269,8 @@ void Glowstick::handleEncoderChange() {
                                               encoderDelta * encoderScale, 0, 255);
   } else if (displayState == DisplayStateBrightness) { // Adjust brightness
     displayBrightness = constrain(displayBrightness + encoderDelta * encoderScale,
-                                  0, DisplayBrightnessLimit);
-    u8g2.setContrast((uint8_t)(
-      pow((float)displayBrightness / DisplayBrightnessLimit, 3) * DisplayBrightnessLimit));
+                                  0, 255);
+    setScaledDisplayBrightness();
   } else if (displayState == DisplayStateAnimation) { // Adjust speed
     animationSpeed = constrain(animationSpeed + encoderDelta * encoderScale,
                                1, 255);
@@ -330,8 +334,9 @@ void Glowstick::setAllLEDs(RGBW color) {
 }
 
 void Glowstick::drawGradient(uint8_t startIndex, uint8_t endIndex, HSV start, HSV end) {
+  int16_t startHue = start.h > end.h ? start.h - 256 : start.h;
   for (uint8_t i = startIndex; i < endIndex; i++) {
-    leds[i] = hsv2rgbw(HSV(map(i, startIndex, endIndex, start.h, end.h),
+    leds[i] = hsv2rgbw(HSV(map(i, startIndex, endIndex, startHue, end.h),
                            map(i, startIndex, endIndex, start.s, end.s),
                            map(i, startIndex, endIndex, start.v, end.v)), ColorCorrection);
   }
