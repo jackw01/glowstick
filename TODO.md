@@ -24,6 +24,7 @@
 - [x] animation scaling
 - [ ] animation - fix integer math bugs
 - [ ] animation - fire
+- [ ] use gradient colors for animations
 - [ ] position control mode
 
 ### Extras
