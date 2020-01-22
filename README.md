@@ -4,7 +4,7 @@
 # Glowstick
 
 ![](img/art-02.png)
-![](img/art-01.png)
+![](img/DSCF6181-DSCF6184.jpg)
 
 ## Features
 * Full onboard control with OLED display and rotary encoder
@@ -15,6 +15,7 @@
 * BOM cost less than US$50 for a 24" long light
 
 ## Hardware
+![](img/DSCF6163.jpg)
 
 #### more coming soon...
 
