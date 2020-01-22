@@ -1,6 +1,3 @@
----
----
-
 # Glowstick
 
 ![](img/art-02.png)
