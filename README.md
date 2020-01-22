@@ -11,6 +11,12 @@
 * Powered over USB or any other 5V source
 * BOM cost less than US$50 for a 24" long light
 
+## Hardware
+
+#### more coming soon...
+
+## Software
+
 #### more coming soon...
 
 ## License
