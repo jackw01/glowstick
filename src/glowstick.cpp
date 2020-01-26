@@ -61,7 +61,7 @@ void Glowstick::init() {
   CRGB *ledsRGB = (CRGB *) &leds[0]; // Hack to get RGBW to work
   FastLED.addLeds<WS2812B, PinLEDs>(ledsRGB, getRGBWSize(LEDCount));
   FastLED.setBrightness(LEDMasterBrightness);
-  setAllLEDs(ColorOff);
+  setAllLEDs(LEDOff);
   FastLED.show();
 
   u8g2.begin();
@@ -244,7 +244,7 @@ void Glowstick::drawAnimationControls() {
   // Sliders
   for (uint8_t i = 0; i <= 1; i++) {
     drawSlider(i + 1, 48, u8g2.getDisplayWidth() - 48,
-               mapFloat(animationParams[i], 0.02, 10.0, 0.0, 255.0), 0, 255,
+               mapFloat(animationParams[i], 0.0, 10.0, 0.0, 255.0), 0, 255,
                currentMenuItem == i, currentMenuItem == i && editState);
   }
 
@@ -281,7 +281,7 @@ void Glowstick::handleEncoderChange() {
     setScaledDisplayBrightness();
   } else if (displayState == DisplayStateAnimation && editState) { // Adjust speed
     animationParams[currentMenuItem] = constrain(animationParams[currentMenuItem] +
-                                                 encoderDelta * encoderScale * EncoderScaleFloat, 0.02, 10.0);
+                                                 encoderDelta * encoderScale * EncoderScaleFloat, 0.0, 10.0);
   } else { // Other cases - just change selected item
     currentMenuItem += encoderDelta;
     if (currentMenuItem < 0) currentMenuItem = currentMenuLength + currentMenuItem;
@@ -361,20 +361,18 @@ void Glowstick::drawGradient(uint8_t startIndex, uint8_t endIndex, HSV start, HS
 void Glowstick::drawAnimationFrame(uint32_t timeMillis) {
   // Get correct time input to animation and selected color
   float t = timeMillis / 1000.0 * animationParams[0];
-  RGBW color = whiteSelected ? RGBW(0, 0, 0, whiteValue) : hsv2rgbw(hsvValue, ColorCorrection);
+  RGBW c = whiteSelected ? RGBW(0, 0, 0, whiteValue) : hsv2rgbw(hsvValue, ColorCorrection);
 
   for (uint8_t i = 0; i < LEDCount; i++) {
     float x = i / (float)LEDCount * animationParams[1]; // Get scaled position
     if (currentAnimation == AnimationCycleHue) {
       leds[i] = hsv2rgbw(t + x, 255, 128, ColorCorrection);
     } else if (currentAnimation == AnimationFlash) {
-      //leds[i] = (t + x) % 255 < 128 ? color : ColorOff;
+      leds[i] = fmod(t + x, 1.0) < 0.5 ? c : LEDOff;
     } else if (currentAnimation == AnimationCheckerboard) {
-      //leds[i] = ((x / 6) % 2 == (t % 64 < 32)) ? color : ColorOff;
-    } else if (currentAnimation == AnimationScan) {
-      //leds[i] = (((x + t * LEDCount / 255) % LEDCount) / 6) == 0 ? color : ColorOff;
-    } else if (currentAnimation == AnimationScanMultiple) {
-      //leds[i] = (((x + t * LEDCount / 255) % LEDCount) / 6) % 2 ? color : ColorOff;
+      leds[i] = (fmod(x * LEDSectorCount, 1.0) < 0.5) == (fmod(t * LEDSectorCount, 1.0) < 0.5) ? c : LEDOff;
+    } else if (currentAnimation == AnimationTriangles) {
+      leds[i] = fmod(x, 1.0) < fmod(t, 1.0) ? c : LEDOff;
     }
   }
 }

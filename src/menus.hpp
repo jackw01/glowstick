@@ -73,18 +73,16 @@ typedef enum : uint8_t {
   AnimationCycleHue,
   AnimationFlash,
   AnimationCheckerboard,
-  AnimationScan,
-  AnimationScanMultiple,
+  AnimationTriangles,
   AnimationMenuItemBack,
   Animations
 } AnimationMenuItem;
 
 // Strings associated with animation menu items
 const char AnimationMenu01[] PROGMEM = "Cycle Hue";
-const char AnimationMenu02[] PROGMEM = "Flash";
+const char AnimationMenu02[] PROGMEM = "Flash/Scan";
 const char AnimationMenu03[] PROGMEM = "Checkerboard";
-const char AnimationMenu04[] PROGMEM = "Scanning Point";
-const char AnimationMenu05[] PROGMEM = "Scanning Points";
+const char AnimationMenu04[] PROGMEM = "Triangles";
 const char AnimationMenu06[] PROGMEM = "Back";
 
 const char * const AnimationMenuStrings[] PROGMEM = {
@@ -92,7 +90,6 @@ const char * const AnimationMenuStrings[] PROGMEM = {
   AnimationMenu02,
   AnimationMenu03,
   AnimationMenu04,
-  AnimationMenu05,
   AnimationMenu06
 };
 

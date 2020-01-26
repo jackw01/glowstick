@@ -13,9 +13,10 @@ const uint8_t PinEncoderButton = 5;
 
 // LEDs
 const uint8_t LEDCount = 84;
+const uint8_t LEDSectorCount = 7; // LEDCount % LEDSectorCount = 0, used for some animations
 const uint8_t LEDMasterBrightness = 255;
 const uint8_t LEDBrightnessRampSpeed = 10; // units/frame
-const RGBW ColorOff = RGBW(0, 0, 0, 0);
+const RGBW LEDOff = RGBW(0, 0, 0, 0);
 const CRGB ColorCorrection = CRGB(255, 176, 240);
 
 // Display
