@@ -47,7 +47,7 @@ class Glowstick {
 
     uint8_t currentAnimation = 0;
     // Speed and scale (1-255 represents 6/255hz to 6hz; 0-255 represents 0-???)
-    uint8_t animationParams[2] = {32, 128};
+    float animationParams[2] = {1.0, 1.0};
 
     void drawScrollingMenu(const char * const *strings);
     void drawBackButton(bool highlight);

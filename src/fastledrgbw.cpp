@@ -119,3 +119,7 @@ RGBW hsv2rgbw(HSV hsv, CRGB correction) {
   return RGBW(r, g, b, w);
 }
 
+RGBW hsv2rgbw(float h, uint8_t s, uint8_t v, CRGB correction) {
+  return hsv2rgbw(HSV((uint8_t)((h - floor(h)) * 255.0), s, v), correction);
+}
+

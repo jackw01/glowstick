@@ -25,8 +25,8 @@ static void encoderISR() {
   }
 }
 
-static float mapToFloat(uint8_t in, uint8_t inMin, uint8_t inMax, float outMin, float outMax) {
-  return (float)(in - inMin) * (outMax - outMin) / (float)(inMax - inMin) + outMin;
+static float mapFloat(float in, float inMin, float inMax, float outMin, float outMax) {
+  return (in - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 }
 
 Glowstick::Glowstick() {
@@ -243,7 +243,8 @@ void Glowstick::drawAnimationControls() {
 
   // Sliders
   for (uint8_t i = 0; i <= 1; i++) {
-    drawSlider(i + 1, 48, u8g2.getDisplayWidth() - 48, animationParams[i], 0, 255,
+    drawSlider(i + 1, 48, u8g2.getDisplayWidth() - 48,
+               mapFloat(animationParams[i], 0.02, 10.0, 0.0, 255.0), 0, 255,
                currentMenuItem == i, currentMenuItem == i && editState);
   }
 
@@ -251,7 +252,7 @@ void Glowstick::drawAnimationControls() {
   u8g2.drawStr(16, CharacterHeight + LineHeight, "Speed");
   u8g2.drawStr(16, CharacterHeight + 2 * LineHeight, "Scale");
   u8g2.setCursor(u8g2.getDisplayWidth() - 40, CharacterHeight);
-  u8g2.print(mapToFloat(animationParams[0], 1, 255, 6.0 / 255.0, 6.0), 3);
+  u8g2.print(animationParams[0], 3);
   u8g2.print("Hz");
 }
 
@@ -280,7 +281,7 @@ void Glowstick::handleEncoderChange() {
     setScaledDisplayBrightness();
   } else if (displayState == DisplayStateAnimation && editState) { // Adjust speed
     animationParams[currentMenuItem] = constrain(animationParams[currentMenuItem] +
-                                                 encoderDelta * encoderScale, 1, 255);
+                                                 encoderDelta * encoderScale * EncoderScaleFloat, 0.02, 10.0);
   } else { // Other cases - just change selected item
     currentMenuItem += encoderDelta;
     if (currentMenuItem < 0) currentMenuItem = currentMenuLength + currentMenuItem;
@@ -359,21 +360,21 @@ void Glowstick::drawGradient(uint8_t startIndex, uint8_t endIndex, HSV start, HS
 
 void Glowstick::drawAnimationFrame(uint32_t timeMillis) {
   // Get correct time input to animation and selected color
-  uint8_t t = (timeMillis * (animationParams[0] * 6) / 1000) % 255;
+  float t = timeMillis / 1000.0 * animationParams[0];
   RGBW color = whiteSelected ? RGBW(0, 0, 0, whiteValue) : hsv2rgbw(hsvValue, ColorCorrection);
 
   for (uint8_t i = 0; i < LEDCount; i++) {
-    uint8_t x = i * animationParams[1] / LEDCount; // Get scaled position
+    float x = i / (float)LEDCount * animationParams[1]; // Get scaled position
     if (currentAnimation == AnimationCycleHue) {
-      leds[i] = hsv2rgbw(HSV(t + x, 255, 128), ColorCorrection);
+      leds[i] = hsv2rgbw(t + x, 255, 128, ColorCorrection);
     } else if (currentAnimation == AnimationFlash) {
-      leds[i] = (t + x) % 255 < 128 ? color : ColorOff;
+      //leds[i] = (t + x) % 255 < 128 ? color : ColorOff;
     } else if (currentAnimation == AnimationCheckerboard) {
-      leds[i] = ((x / 6) % 2 == (t % 64 < 32)) ? color : ColorOff;
+      //leds[i] = ((x / 6) % 2 == (t % 64 < 32)) ? color : ColorOff;
     } else if (currentAnimation == AnimationScan) {
-      leds[i] = (((x + t * LEDCount / 255) % LEDCount) / 6) == 0 ? color : ColorOff;
+      //leds[i] = (((x + t * LEDCount / 255) % LEDCount) / 6) == 0 ? color : ColorOff;
     } else if (currentAnimation == AnimationScanMultiple) {
-      leds[i] = (((x + t * LEDCount / 255) % LEDCount) / 6) % 2 ? color : ColorOff;
+      //leds[i] = (((x + t * LEDCount / 255) % LEDCount) / 6) % 2 ? color : ColorOff;
     }
   }
 }

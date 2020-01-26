@@ -38,7 +38,7 @@ struct HSV {
 
   inline HSV() __attribute__((always_inline)) {}
 
-  inline HSV( uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline))
+  inline HSV(uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline))
     : h(ih), s(is), v(iv) { }
 
   inline HSV(const HSV& rhs) __attribute__((always_inline)) {
@@ -108,3 +108,4 @@ struct RGBW {
 
 uint16_t getRGBWSize(uint16_t numLEDs);
 RGBW hsv2rgbw(HSV hsv, CRGB correction);
+RGBW hsv2rgbw(float h, uint8_t s, uint8_t v, CRGB correction);

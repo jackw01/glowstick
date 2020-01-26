@@ -29,6 +29,7 @@ const uint8_t DebounceInterval = 20; // 24 ppr * 20ms = 480ms per rotation min
 const uint8_t EncoderCoarseSpeedThreshold = 80; // below this time between pulses, increase speed
 const uint8_t EncoderFineAdjustScale = 1; // minimum adjustment speed
 const uint8_t EncoderCoarseAdjustScale = 12; // maximum adjustment speed
+const float EncoderScaleFloat = 0.025; // fine scale for floating-point number inputs
 
 // Misc
 const uint8_t UpdateInterval = 20; // ms per frame
@@ -38,3 +39,5 @@ const uint8_t EEPROMAddrInitialization = 0;
 const uint8_t EEPROMAddrDisplayBrightness = 1;
 const uint8_t EEPROMAddrHSVValue = 2;
 const uint8_t EEPROMAddrWhiteValue = 5; // 3 bytes for hsv
+
+// 82% ram used with int math!
