@@ -33,7 +33,7 @@ const uint8_t EncoderCoarseAdjustScale = 12; // maximum adjustment speed
 const float EncoderScaleFloat = 0.025; // fine scale for floating-point number inputs
 
 // Misc
-const uint8_t UpdateInterval = 20; // ms per frame
+const uint8_t UpdateInterval = 10; // ms per frame
 
 // EEPROM Settings
 const uint8_t EEPROMAddrInitialization = 0;

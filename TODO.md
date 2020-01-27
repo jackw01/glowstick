@@ -22,8 +22,9 @@
 - [x] save white/color pref for animations
 - [x] save settings eeprom
 - [x] animation scaling
-- [ ] animation - fire
+- [x] animation - fire
 - [x] use gradient colors for animations
+- [x] make encoder controls wrap
 
 ### Extras
 - [ ] image loading from sd card

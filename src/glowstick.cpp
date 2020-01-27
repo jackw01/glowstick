@@ -29,6 +29,12 @@ static float mapFloat(float in, float inMin, float inMax, float outMin, float ou
   return (in - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 }
 
+static float wrap(float in, float min, float max) {
+  if (in >= min && in <= max) return in;
+  else if (in < min) return max - (min - in);
+  else return min + (in - max);
+}
+
 Glowstick::Glowstick() {
 }
 
@@ -89,6 +95,7 @@ void Glowstick::tick() {
   // Rate limit the loop
   uint32_t time = millis();
   if (time - lastUpdate >= UpdateInterval) {
+    //Serial.println(time - lastUpdate);
     // Read encoder and button
     if (encoderDelta != 0) {
       handleEncoderChange();
@@ -267,21 +274,19 @@ void Glowstick::drawBrightnessControls() {
 
 void Glowstick::handleEncoderChange() {
   if (displayState == DisplayStateHSV && editState) { // Editing HSV values
-    hsvValue[currentMenuItem] = constrain(hsvValue[currentMenuItem] +
-                                          encoderDelta * encoderScale, 0, 255);
+    hsvValue[currentMenuItem] = hsvValue[currentMenuItem] + encoderDelta * encoderScale;
   } else if (displayState == DisplayStateWhite && editState) { // Editing white value
-    whiteValue = constrain(whiteValue + encoderDelta * encoderScale, 0, 255);
+    whiteValue = whiteValue + encoderDelta * encoderScale;
   } else if (displayState == DisplayStateGradient && editState) { // Editing gradient
     uint8_t color = currentMenuItem > 2;
     uint8_t value = currentMenuItem % 3;
-    gradientColors[color][value] = constrain(gradientColors[color][value] +
-                                              encoderDelta * encoderScale, 0, 255);
+    gradientColors[color][value] = gradientColors[color][value] + encoderDelta * encoderScale;
   } else if (displayState == DisplayStateBrightness) { // Adjust brightness
-    displayBrightness = constrain(displayBrightness + encoderDelta * encoderScale, 0, 255);
+    displayBrightness = displayBrightness + encoderDelta * encoderScale;
     setScaledDisplayBrightness();
   } else if (displayState == DisplayStateAnimation && editState) { // Adjust speed
-    animationParams[currentMenuItem] = constrain(animationParams[currentMenuItem] +
-                                                 encoderDelta * encoderScale * EncoderScaleFloat, 0.0, 10.0);
+    animationParams[currentMenuItem] = wrap(animationParams[currentMenuItem] +
+                                            encoderDelta * encoderScale * EncoderScaleFloat, 0.0, 10.0);
   } else { // Other cases - just change selected item
     currentMenuItem += encoderDelta;
     if (currentMenuItem < 0) currentMenuItem = currentMenuLength + currentMenuItem;
@@ -382,6 +387,37 @@ void Glowstick::drawAnimationFrame(uint32_t timeMillis) {
       leds[i] = (fmod(x * LEDSectorCount, 1.0) < 0.5) == (fmod(t * LEDSectorCount, 1.0) < 0.5) ? c : LEDOff;
     } else if (currentAnimation == AnimationTriangles) {
       leds[i] = fmod(x, 1.0) < fmod(t, 1.0) ? c : LEDOff;
+    } else if (currentAnimation == AnimationFire) { // Very crude but it works
+      leds[i].w = qsub8(leds[i].w, random8(30, 255));
+      if (i < LEDCount - 1) leds[i].w = (leds[i + 1].w + leds[i + 2].w + leds[i + 2].w) / 3;
+      if (x > 0.5 && random8() < 2 * animationParams[0]) leds[i].w = qadd8(leds[i].w, random8(60, 255));
+      leds[i].r =
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      255 - (leds[i].w - 1);
+      leds[i].g = qsub8(leds[i].r, 200);
     }
   }
 }

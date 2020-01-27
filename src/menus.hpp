@@ -74,6 +74,7 @@ typedef enum : uint8_t {
   AnimationFlash,
   AnimationCheckerboard,
   AnimationTriangles,
+  AnimationFire,
   AnimationMenuItemBack,
   Animations
 } AnimationMenuItem;
@@ -83,6 +84,7 @@ const char AnimationMenu01[] PROGMEM = "Cycle Hue";
 const char AnimationMenu02[] PROGMEM = "Flash/Scan";
 const char AnimationMenu03[] PROGMEM = "Checkerboard";
 const char AnimationMenu04[] PROGMEM = "Triangles";
+const char AnimationMenu05[] PROGMEM = "Fire";
 const char AnimationMenu06[] PROGMEM = "Back";
 
 const char * const AnimationMenuStrings[] PROGMEM = {
@@ -90,6 +92,7 @@ const char * const AnimationMenuStrings[] PROGMEM = {
   AnimationMenu02,
   AnimationMenu03,
   AnimationMenu04,
+  AnimationMenu05,
   AnimationMenu06
 };
 
