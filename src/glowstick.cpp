@@ -309,11 +309,9 @@ void Glowstick::handleButtonPress() {
              displayState == DisplayStateBrightness) {
     // Save settings for some states
     writeEEPROMSettings();
-    if (displayState == DisplayStateHSV) {
-      whiteSelected = false;
-    } else if (displayState == DisplayStateWhite) {
-      whiteSelected = true;
-    }
+    if (displayState == DisplayStateHSV ||
+        displayState == DisplayStateWhite ||
+        displayState == DisplayStateGradient) selectedColorMode = displayState;
     // Go back to main menu, reset parameters
     // After being on another screen, displayState stores the original menu item
     currentMenuItem = displayState;
@@ -361,10 +359,21 @@ void Glowstick::drawGradient(uint8_t startIndex, uint8_t endIndex, HSV start, HS
 void Glowstick::drawAnimationFrame(uint32_t timeMillis) {
   // Get correct time input to animation and selected color
   float t = timeMillis / 1000.0 * animationParams[0];
-  RGBW c = whiteSelected ? RGBW(0, 0, 0, whiteValue) : hsv2rgbw(hsvValue, ColorCorrection);
+  RGBW c;
+  if (selectedColorMode == DisplayStateHSV) c = hsv2rgbw(hsvValue, ColorCorrection);
+  else if (selectedColorMode == DisplayStateWhite) c = RGBW(0, 0, 0, whiteValue);
+  int16_t startHue = gradientColors[0].h > gradientColors[1].h ? gradientColors[0].h - 256 :
+                                                                 gradientColors[0].h;
 
   for (uint8_t i = 0; i < LEDCount; i++) {
     float x = i / (float)LEDCount * animationParams[1]; // Get scaled position
+    // If using gradient, get pixel color
+    if (selectedColorMode == DisplayStateGradient) {
+      c = hsv2rgbw(HSV(map(i, 0, LEDCount, startHue, gradientColors[1].h),
+                       map(i, 0, LEDCount, gradientColors[0].s, gradientColors[1].s),
+                       map(i, 0, LEDCount, gradientColors[0].v, gradientColors[1].v)), ColorCorrection);
+    }
+
     if (currentAnimation == AnimationCycleHue) {
       leds[i] = hsv2rgbw(t + x, 255, 128, ColorCorrection);
     } else if (currentAnimation == AnimationFlash) {

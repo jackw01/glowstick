@@ -42,7 +42,7 @@ class Glowstick {
     uint8_t ledTransitionState = 0;
     HSV hsvValue = HSV(128, 255, 255);
     uint8_t whiteValue = 128;
-    bool whiteSelected = false; // was white last selected (for animations)
+    uint8_t selectedColorMode = DisplayStateHSV; // what color was last selected (for animations)
     HSV gradientColors[2] = {HSV(0, 255, 255), HSV(255, 255, 255)};
 
     uint8_t currentAnimation = 0;

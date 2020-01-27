@@ -23,8 +23,7 @@
 - [x] save settings eeprom
 - [x] animation scaling
 - [ ] animation - fire
-- [ ] use gradient colors for animations
-- [ ] position control mode
+- [x] use gradient colors for animations
 
 ### Extras
 - [ ] image loading from sd card
