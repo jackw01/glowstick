@@ -49,14 +49,16 @@ The other contacts for the encoder and button are connected to ground. The displ
 ### 3D printed parts
 STL files for all 3D printed parts and original Solidworks design files can be found in the [GrabCAD folder for this project](https://workbench.grabcad.com/workbench/projects/gcfMel1k3mHmgKFM-v4mYhzHF4UytLH0CcWSUiFCYhUIy2#/space/gcyOI77-vFgamuT2R-LxKiL_oJ_SbqqWW22Kso9QQ5grLW). All parts should be printed at 100% infill. Supports are required for `20-stick-p001 electronics enclosure`, `20-stick-p003 electronics enclosure cover`, and `20-stick-p005 encoder knob`. I printed everything in PETG; any material should work but stronger ones are recommended. Disable x/y size compensation when printing `20-stick-p005 encoder knob`.
 
-There is intentionally no spot in the 3D printed housing for mounting a power connector, as the LED strips used may or may not come with a pre-attached barrel jack and some may prefer a completely different connector type instead.
+There is intentionally no spot in the 3D printed housing for mounting a power connector, as the LED strips used may or may not come with a pre-attached barrel jack and some may prefer a completely different connector type instead. Even with 84 LEDs, current draw is low enough that everything can be powered by a standard USB power bank capable of supplying 2-2.4A at 5V.
 
 The Arduino Pro Mini and the OLED Display are mounted using 3M VHB tape cut to fit the mounting surfaces on their respective parts. The electronics enclosure is designed to accomodate a Pro Mini with a vertical programming header. If yours has a right-angle header, it can be bent up and trimmed by about 2mm to match the dimensions of a vertical header.
 
 ### LED strip mounting
 Mounting an LED strip inside a small diameter tube is hard. The tube is curved and the LED strip is not, and the strip does not stay flat unless it is supported along its entire length.
 
-My solution to this is to use VHB tape to semi-permanently attach several 3D-printed mounting points inside the tube at regular intervals. The LED strip is attached to these mounting points using 3M Dual Lock allowing it to be easily removed and reinstalled later on.
+![](img/DSCF6732.jpg)
+
+My solution to this is to use VHB tape to semi-permanently attach several 3D printed mounting points inside the tube at regular intervals. The LED strip is attached to these mounting points using 3M Dual Lock allowing it to be easily removed and reinstalled later on.
 
 ## License
 MIT
