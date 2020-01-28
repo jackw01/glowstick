@@ -388,36 +388,14 @@ void Glowstick::drawAnimationFrame(uint32_t timeMillis) {
     } else if (currentAnimation == AnimationTriangles) {
       leds[i] = fmod(x, 1.0) < fmod(t, 1.0) ? c : LEDOff;
     } else if (currentAnimation == AnimationFire) { // Very crude but it works
-      leds[i].w = qsub8(leds[i].w, random8(30, 255));
-      if (i < LEDCount - 1) leds[i].w = (leds[i + 1].w + leds[i + 2].w + leds[i + 2].w) / 3;
-      if (x > 0.5 && random8() < 2 * animationParams[0]) leds[i].w = qadd8(leds[i].w, random8(60, 255));
-      leds[i].r =
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      255 - (leds[i].w - 1);
-      leds[i].g = qsub8(leds[i].r, 200);
+      leds[i].w = qsub8(leds[i].w, random8(1, 4));
+      if (i < LEDCount - 1 && random8() < 48 * animationParams[0]) {
+        leds[i].w = (leds[i + 1].w + leds[i + 1].w + leds[i + 2].w) / 3;
+      }
+      if (x > 0.5 && random8() < 3 * animationParams[0]) leds[i].w = qadd8(leds[i].w, random8(16, 255));
+      leds[i].r = qsub8(c.r, leds[i].w - 1);
+      leds[i].g = qsub8(c.g, leds[i].w - 1);
+      leds[i].b = qsub8(c.b, leds[i].w - 1);
     }
   }
 }

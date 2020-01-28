@@ -40,5 +40,3 @@ const uint8_t EEPROMAddrInitialization = 0;
 const uint8_t EEPROMAddrDisplayBrightness = 1;
 const uint8_t EEPROMAddrHSVValue = 2;
 const uint8_t EEPROMAddrWhiteValue = 5; // 3 bytes for hsv
-
-// 82% ram used with int math!
