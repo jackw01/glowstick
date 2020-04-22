@@ -25,10 +25,12 @@ static void encoderISR() {
   }
 }
 
+// Map a value to a range
 static float mapFloat(float in, float inMin, float inMax, float outMin, float outMax) {
   return (in - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 }
 
+// Wrap a value around a range
 static float wrap(float in, float min, float max) {
   if (in >= min && in <= max) return in;
   else if (in < min) return max - (min - in);
@@ -55,6 +57,8 @@ void Glowstick::init() {
     EEPROM.get(EEPROMAddrHSVValue, hsvValue);
     EEPROM.get(EEPROMAddrWhiteValue, whiteValue);
     EEPROM.get(EEPROMAddrDisplayBrightness, displayBrightness);
+    EEPROM.get(EEPROMAddrGradient0, gradientColors[0]);
+    EEPROM.get(EEPROMAddrGradient1, gradientColors[1]);
   }
 
   cli(); // Disable interrupts before attaching and then enable
@@ -187,7 +191,9 @@ void Glowstick::drawSlider(uint8_t line, uint8_t left, uint8_t width,
   uint8_t barLength = map(value, min, max, 0, width - 4);
   if (active) {
     u8g2.drawBox(left + 2 + barLength - 1, 3 + line * LineHeight, 3, CharacterHeight - 6);
-  } else u8g2.drawBox(left + 2, 3 + line * LineHeight, barLength, CharacterHeight - 6);
+  } else {
+    u8g2.drawBox(left + 2, 3 + line * LineHeight, barLength, CharacterHeight - 6);
+  }
 }
 
 void Glowstick::setScaledDisplayBrightness() {
@@ -286,7 +292,8 @@ void Glowstick::handleEncoderChange() {
     setScaledDisplayBrightness();
   } else if (displayState == DisplayStateAnimation && editState) { // Adjust speed
     animationParams[currentMenuItem] = wrap(animationParams[currentMenuItem] +
-                                            encoderDelta * encoderScale * EncoderScaleFloat, 0.0, 10.0);
+                                            encoderDelta * encoderScale * EncoderScaleFloat,
+                                            0.0, 10.0);
   } else { // Other cases - just change selected item
     currentMenuItem += encoderDelta;
     if (currentMenuItem < 0) currentMenuItem = currentMenuLength + currentMenuItem;
@@ -344,6 +351,8 @@ void Glowstick::writeEEPROMSettings() {
   EEPROM.put(EEPROMAddrHSVValue, hsvValue);
   EEPROM.put(EEPROMAddrWhiteValue, whiteValue);
   EEPROM.put(EEPROMAddrDisplayBrightness, displayBrightness);
+  EEPROM.put(EEPROMAddrGradient0, gradientColors[0]);
+  EEPROM.put(EEPROMAddrGradient1, gradientColors[1]);
 }
 
 // LED drawing
@@ -376,7 +385,8 @@ void Glowstick::drawAnimationFrame(uint32_t timeMillis) {
     if (selectedColorMode == DisplayStateGradient) {
       c = hsv2rgbw(HSV(map(i, 0, LEDCount, startHue, gradientColors[1].h),
                        map(i, 0, LEDCount, gradientColors[0].s, gradientColors[1].s),
-                       map(i, 0, LEDCount, gradientColors[0].v, gradientColors[1].v)), ColorCorrection);
+                       map(i, 0, LEDCount, gradientColors[0].v, gradientColors[1].v)),
+                       ColorCorrection);
     }
 
     if (currentAnimation == AnimationCycleHue) {
@@ -384,7 +394,8 @@ void Glowstick::drawAnimationFrame(uint32_t timeMillis) {
     } else if (currentAnimation == AnimationFlash) {
       leds[i] = fmod(t + x, 1.0) < 0.5 ? c : LEDOff;
     } else if (currentAnimation == AnimationCheckerboard) {
-      leds[i] = (fmod(x * LEDSectorCount, 1.0) < 0.5) == (fmod(t * LEDSectorCount, 1.0) < 0.5) ? c : LEDOff;
+      leds[i] = (fmod(x * LEDSectorCount, 1.0) < 0.5) == (fmod(t * LEDSectorCount, 1.0) < 0.5) ?
+                c : LEDOff;
     } else if (currentAnimation == AnimationTriangles) {
       leds[i] = fmod(x, 1.0) < fmod(t, 1.0) ? c : LEDOff;
     } else if (currentAnimation == AnimationFire) { // Very crude but it works
@@ -392,7 +403,9 @@ void Glowstick::drawAnimationFrame(uint32_t timeMillis) {
       if (i < LEDCount - 1 && random8() < 48 * animationParams[0]) {
         leds[i].w = (leds[i + 1].w + leds[i + 1].w + leds[i + 2].w) / 3;
       }
-      if (x > 0.5 && random8() < 3 * animationParams[0]) leds[i].w = qadd8(leds[i].w, random8(16, 255));
+      if (x > 0.5 && random8() < 3 * animationParams[0]) {
+        leds[i].w = qadd8(leds[i].w, random8(16, 255));
+      }
       leds[i].r = qsub8(c.r, leds[i].w - 1);
       leds[i].g = qsub8(c.g, leds[i].w - 1);
       leds[i].b = qsub8(c.b, leds[i].w - 1);
