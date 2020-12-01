@@ -54,11 +54,9 @@ There is intentionally no spot in the 3D printed housing for mounting a power co
 The Arduino Pro Mini and the OLED Display are mounted using 3M VHB tape cut to fit the mounting surfaces on their respective parts. The electronics enclosure is designed to accomodate a Pro Mini with a vertical programming header. If yours has a right-angle header, it can be bent up and trimmed by about 2mm to match the dimensions of a vertical header.
 
 ### LED strip mounting
-Mounting an LED strip inside a small diameter tube is hard. The tube is curved and the LED strip is not, and the strip does not stay flat unless it is supported along its entire length.
-
 ![](img/DSCF6732.jpg)
 
-My solution to this is to use VHB tape to semi-permanently attach several 3D printed mounting points inside the tube at regular intervals. The LED strip is attached to these mounting points using 3M Dual Lock allowing it to be easily removed and reinstalled later on.
+I used VHB tape to semi-permanently attach several 3D printed mounting points inside the tube at regular intervals. The LED strip is attached to these mounting points using 3M Dual Lock allowing it to be easily removed and reinstalled later on.
 
 ## License
 MIT
