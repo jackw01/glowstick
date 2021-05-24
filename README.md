@@ -21,7 +21,7 @@
 * SK6812 RGBW LED strip, 1m length, 144 LED/m IP30
 * SSD1306 I2C OLED display breakout board, 128x32 pixels
 * EC11 series rotary encoder, push button switch, 15mm knurled shaft (EC11M)
-* Clear polycarbonate tube, 1" OD 3/4in ID, 24in length
+* Clear polycarbonate tube, 1" OD 0.75" ID, 24" length
 * M3 hex socket head cap screws, 4x 20mm and 2x 8mm; 6x M3 hex nuts
 
 ## Software
@@ -35,7 +35,7 @@ The firmware is built using [PlatformIO](http://docs.platformio.org/en/latest/id
 ## Build your own
 
 ### Wiring
-All Arduino pin assignments are set in `constants.hpp`. The defaults are shown below:
+All Arduino pin assignments are set in constants.hpp. The defaults are shown below:
 
 ```c++
 const uint8_t PinLEDs = 2;
@@ -47,7 +47,7 @@ const uint8_t PinEncoderButton = 5;
 The other contacts for the encoder and button are connected to ground. The display I2C pins connect to Arduino pins A4 (SDA) and A5 (SCL). The 5V and ground wires on the LED strip's connector are connected to the Arduino 5V and ground lines.
 
 ### 3D printed parts
-STL files for all 3D printed parts can be found in the `3d-printing` folder. The original Solidworks design files can be found in the [GrabCAD folder for this project](https://workbench.grabcad.com/workbench/projects/gcfMel1k3mHmgKFM-v4mYhzHF4UytLH0CcWSUiFCYhUIy2#/space/gcyOI77-vFgamuT2R-LxKiL_oJ_SbqqWW22Kso9QQ5grLW). All parts should be printed at 100% infill. Supports are required for `20-stick-p001 electronics enclosure`, `20-stick-p003 electronics enclosure cover`, and `20-stick-p005 encoder knob`. I printed everything in PETG; any material should work but stronger ones are recommended. Disable x/y size compensation when printing `20-stick-p005 encoder knob`.
+STL files for all 3D printed parts can be found in the 3d-printing folder. The original Solidworks design files can be found in the [GrabCAD folder for this project](https://workbench.grabcad.com/workbench/projects/gcfMel1k3mHmgKFM-v4mYhzHF4UytLH0CcWSUiFCYhUIy2#/space/gcyOI77-vFgamuT2R-LxKiL_oJ_SbqqWW22Kso9QQ5grLW). All parts should be printed at 100% infill. Supports are required for 20-stick-p001 electronics enclosure, 20-stick-p003 electronics enclosure cover, and 20-stick-p005 encoder knob. I printed everything in PETG; any material should work but stronger ones are recommended. Disable x/y size compensation when printing 20-stick-p005 encoder knob.
 
 There is intentionally no spot in the 3D printed housing for mounting a power connector, as the LED strips used may or may not come with a pre-attached barrel jack and some may prefer a completely different connector type instead. Even with 84 LEDs, current draw is low enough that everything can be powered by a standard USB power bank capable of supplying 2-2.4A at 5V.
 
