@@ -22,6 +22,7 @@
 * SSD1306 I2C OLED display breakout board, 128x32 pixels
 * EC11 series rotary encoder, push button switch, 15mm knurled shaft (EC11M)
 * Clear polycarbonate tube, 1" OD 0.75" ID, 24" length
+* Diffusion gel, 24"x1.5" (optional) 
 * M3 hex socket head cap screws, 4x 20mm and 2x 8mm; 6x M3 hex nuts
 
 ## Software
@@ -56,7 +57,7 @@ The Arduino Pro Mini and the OLED Display are mounted using 3M VHB tape cut to f
 ### LED strip mounting
 ![](img/DSCF6732.jpg)
 
-I used VHB tape to semi-permanently attach several 3D printed mounting points inside the tube at regular intervals. The LED strip is attached to these mounting points using 3M Dual Lock allowing it to be easily removed and reinstalled later on.
+I used VHB tape to semi-permanently attach several 3D printed mounting points inside the tube at regular intervals. The LED strip is attached to these mounting points using 3M Dual Lock allowing it to be easily removed and reinstalled later on. A ~1.5"/40mm wide strip of diffusion gel of your choice can be rolled up and inserted into the tube to diffuse the light as desired.
 
 ## License
 MIT
